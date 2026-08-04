@@ -2,13 +2,13 @@ using System.Collections;
 
 namespace AetherSystem.OperationReport.Collections;
 
-
 public class SegmentedArrayPool<T> where T : unmanaged
 {
     private readonly int _segmentCount;
     private readonly ArrayView[] _segments;
-    private int _segmentSize;
     private T[] _pool = [];
+
+    public int SegmentSize { get; private set; }
 
     public SegmentedArrayPool(int segmentCount)
     {
@@ -30,18 +30,33 @@ public class SegmentedArrayPool<T> where T : unmanaged
         return _segments[segment];
     }
 
+    public IReadOnlyList<IReadOnlyList<T>> GetTransposedSegments(
+        IReadOnlyList<int> indexes,
+        int offset,
+        int count)
+    {
+        count = int.Min(count, SegmentSize - offset);
+        var array = new IReadOnlyList<T>[count];
+        for (int i = 0; i < count; i++)
+        {
+            array[i] = new TransposedArrayView(this, indexes, offset + i);
+        }
+
+        return array.AsReadOnly();
+    }
+
     public void ResizeSegment(int segmentSize)
     {
         EnsureCapacity(segmentSize * _segmentCount);
-        _segmentSize = segmentSize;
+        SegmentSize = segmentSize;
         for (int i = 0; i < _segmentCount; i++)
         {
             var segment = _segments[i];
-            segment.Count = _segmentSize;
-            segment.Offset = i * _segmentSize;
+            segment.Count = SegmentSize;
+            segment.Offset = i * SegmentSize;
         }
     }
-    
+
     private void EnsureCapacity(int capacity)
     {
         if(_pool.Length >= capacity)
@@ -58,11 +73,13 @@ public class SegmentedArrayPool<T> where T : unmanaged
         public int Count { get; set; }
         public int Offset { get; set; }
 
+        public T this[int index] => parent._pool[Offset + index];
+
         public ArraySegment<T> GetArraySegment()
         {
             return new ArraySegment<T>(parent._pool, Offset, Count);
         }
-        
+
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
@@ -73,7 +90,26 @@ public class SegmentedArrayPool<T> where T : unmanaged
             var segment = GetArraySegment();
             return segment.GetEnumerator();
         }
+    }
 
-        public T this[int index] => parent._pool[Offset + index];
+    private class TransposedArrayView(
+        SegmentedArrayPool<T> parent,
+        IReadOnlyList<int> segments,
+        int offset) : IReadOnlyList<T>
+    {
+        public int Count => segments.Count;
+
+        public T this[int index] => parent._pool[segments[index] * parent.SegmentSize + offset];
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            for(int i = 0; i < Count; i++)
+                yield return this[i];
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
     }
 }

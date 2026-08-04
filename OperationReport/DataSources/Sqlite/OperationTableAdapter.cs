@@ -22,9 +22,9 @@ public class OperationTableAdapter(OperationSourceInfo sourceInfo)
         FilterQuery filterQuery,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var query = CreateFilterQuery(filterQuery).Select(
-            sourceInfo.TimestampColumn.Name,
-            sourceInfo.CommentColumn.Name);
+        var query = CreateFilterQuery(filterQuery)
+            .Select(sourceInfo.TimestampColumn.Name, sourceInfo.CommentColumn.Name)
+            .OrderBy(sourceInfo.TimestampColumn.Name);
 
         await using var command = CreateExecutableCommand(query);
         var timestampConverter = new TimestampResolver(sourceInfo.TimestampColumn);

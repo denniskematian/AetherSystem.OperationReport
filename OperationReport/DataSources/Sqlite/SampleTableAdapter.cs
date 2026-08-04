@@ -26,7 +26,8 @@ public class SampleTableAdapter(SampleDataSourceInfo sourceInfo)
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var query = CreateFilterQuery(filterQuery)
-            .Select([TimestampColumn.Name, ..SampleColumns.Select(c => c.Name)]);
+            .Select([TimestampColumn.Name, ..SampleColumns.Select(c => c.Name)])
+            .OrderBy(TimestampColumn.Name);
 
         await using var command = CreateExecutableCommand(query);
 
