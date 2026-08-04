@@ -29,13 +29,13 @@ public sealed class DataCollector
     public IReadOnlyList<double> GetSampleDataSource(string column)
     {
         var index = _sampleColumnIndexLookup[column];
-        return _sampleArrayPool.GetSegmentReference(index);
+        return _sampleArrayPool.GetSegmentReference(index + 1);
     }
 
     public IReadOnlyList<double> GetOperationDataSource(string column)
     {
         var index = _sampleColumnIndexLookup[column];
-        return _operationArrayPool.GetSegmentReference(index);
+        return _operationArrayPool.GetSegmentReference(index + 1);
     }
 
     public async Task UpdateDataAsync(SampleFilterQuery sampleFilter, CancellationToken cancellationToken = default)
@@ -92,7 +92,6 @@ public sealed class DataCollector
     private void GetSampleValuesAt(double oaTimestamp, Span<double> buffer)
     {
         var segments = _sampleArrayPool.GetArraySegments();
-        Span<double> result = stackalloc double[_sampleColumnIndexLookup.Count];
 
         var timestampSegment = segments[0].Span;
         var index = timestampSegment.BinarySearch(oaTimestamp);
@@ -113,10 +112,10 @@ public sealed class DataCollector
         var lower = timestampSegment[index - 1];
         var upper = timestampSegment[index];
         var weight = (oaTimestamp - lower) / (upper - lower);
-        for (int i = 0; i < result.Length; i++)
+        for (int i = 0; i < buffer.Length; i++)
         {
             var segment = segments[i + 1].Span;
-            result[i] = double.Lerp(segment[index - 1], segment[index], weight);
+            buffer[i] = double.Lerp(segment[index - 1], segment[index], weight);
         }
     }
 }
