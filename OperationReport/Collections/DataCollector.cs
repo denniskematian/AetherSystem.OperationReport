@@ -12,6 +12,8 @@ public sealed class DataCollector
     private readonly SegmentedArrayPool<double> _sampleArrayPool;
     private readonly SegmentedArrayPool<double> _operationArrayPool;
     private readonly List<string> _operationComments = [];
+    
+    private readonly SemaphoreSlim _lock = new(1, 1);
 
     public DataCollector(
         ISampleTableAdapter sampleTableAdapter,
@@ -42,54 +44,63 @@ public sealed class DataCollector
 
     public PageResult<Sample> GetSamplePage(PageRequest request)
     {
-        var totalCount = _sampleArrayPool.SegmentSize;
-        var (offset, length) = request.ComputeRange(totalCount);
-        if (length == 0)
-            return new PageResult<Sample>(request.PageSize);
-
-        var samples = new Sample[length];
-        var timestampSegment = _sampleArrayPool.GetSegmentReference(0);
-        var indexes = Enumerable.Range(1, _sampleTableAdapter.SampleColumns.Count).ToArray();
-
-        var transposedSegments = _sampleArrayPool
-            .GetTransposedSegments(indexes, offset, length);
-
-        for (int i = 0; i < length; i++)
+        using (LockHandle.Lock(_lock))
         {
-            var timestamp = DateTime.FromOADate(timestampSegment[offset + i]);
-            samples[i] = new Sample(timestamp, transposedSegments[i]);
-        }
+            var totalCount = _sampleArrayPool.SegmentSize;
+            var (offset, length) = request.ComputeRange(totalCount);
+            if (length == 0)
+                return new PageResult<Sample>(request.PageSize);
 
-        return new PageResult<Sample>(request.Page, request.PageSize, totalCount, samples);
+            var samples = new Sample[length];
+            var timestampSegment = _sampleArrayPool.GetSegmentReference(0);
+            var indexes = Enumerable.Range(1, _sampleTableAdapter.SampleColumns.Count).ToArray();
+
+            var transposedSegments = _sampleArrayPool
+                .GetTransposedSegments(indexes, offset, length);
+
+            for (int i = 0; i < length; i++)
+            {
+                var timestamp = DateTime.FromOADate(timestampSegment[offset + i]);
+                samples[i] = new Sample(timestamp, transposedSegments[i]);
+            }
+
+            return new PageResult<Sample>(request.Page, request.PageSize, totalCount, samples);
+        }
     }
 
     public PageResult<OperationSample> GetOperationPage(PageRequest request)
     {
-        var totalCount = _operationArrayPool.SegmentSize;
-        var (offset, length) = request.ComputeRange(totalCount);
-        if (length == 0)
-            return new PageResult<OperationSample>(request.PageSize);
-        
-        var operations = new OperationSample[length];
-        var timestampSegment = _operationArrayPool.GetSegmentReference(0);
-        var indexes = Enumerable.Range(1, _sampleTableAdapter.SampleColumns.Count).ToArray();
-        var transposedSegments = _operationArrayPool
-            .GetTransposedSegments(indexes, offset, length);
-
-        for (int i = 0; i < length; i++)
+        using (LockHandle.Lock(_lock))
         {
-            var timestamp = DateTime.FromOADate(timestampSegment[offset + i]);
-            var comment = _operationComments[offset + i];
-            operations[i] = new OperationSample(timestamp, comment, transposedSegments[i]);
+            var totalCount = _operationArrayPool.SegmentSize;
+            var (offset, length) = request.ComputeRange(totalCount);
+            if (length == 0)
+                return new PageResult<OperationSample>(request.PageSize);
+
+            var operations = new OperationSample[length];
+            var timestampSegment = _operationArrayPool.GetSegmentReference(0);
+            var indexes = Enumerable.Range(1, _sampleTableAdapter.SampleColumns.Count).ToArray();
+            var transposedSegments = _operationArrayPool
+                .GetTransposedSegments(indexes, offset, length);
+
+            for (int i = 0; i < length; i++)
+            {
+                var timestamp = DateTime.FromOADate(timestampSegment[offset + i]);
+                var comment = _operationComments[offset + i];
+                operations[i] = new OperationSample(timestamp, comment, transposedSegments[i]);
+            }
+
+            return new PageResult<OperationSample>(request.Page, request.PageSize, totalCount, operations);
         }
-        
-        return new PageResult<OperationSample>(request.Page, request.PageSize, totalCount, operations);
     }
 
     public async Task UpdateDataAsync(SampleFilterQuery sampleFilter, CancellationToken cancellationToken = default)
     {
-        await UpdateSampleDataAsync(sampleFilter, cancellationToken);
-        await UpdateOperationDataAsync(sampleFilter, cancellationToken);
+        using (await LockHandle.LockAsync(_lock, cancellationToken))
+        {
+            await UpdateSampleDataAsync(sampleFilter, cancellationToken);
+            await UpdateOperationDataAsync(sampleFilter, cancellationToken);
+        }
     }
 
     private async Task UpdateSampleDataAsync(SampleFilterQuery sampleFilter, CancellationToken cancellationToken = default)
@@ -168,4 +179,22 @@ public sealed class DataCollector
             buffer[i] = double.Lerp(segment[index - 1], segment[index], weight);
         }
     }
+
+    private class LockHandle(SemaphoreSlim semaphore) : IDisposable
+    {
+        public static async Task<LockHandle> LockAsync(SemaphoreSlim semaphore, CancellationToken cancellationToken)
+        {
+            await semaphore.WaitAsync(cancellationToken);
+            return new LockHandle(semaphore);
+        }
+
+        public static LockHandle Lock(SemaphoreSlim semaphore)
+        {
+            semaphore.Wait();
+            return new LockHandle(semaphore);
+        }
+
+        public void Dispose() => semaphore.Release();
+    }
+        
 }
