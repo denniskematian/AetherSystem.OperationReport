@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OperationReport", "Operatio
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OperationReport.Test", "OperationReport.Test\OperationReport.Test.csproj", "{96101099-E3FD-4CA9-A3E5-08003A839DA4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sandbox", "Sandbox\Sandbox.csproj", "{10C54556-5F22-4443-BE36-DD1B8E432399}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{96101099-E3FD-4CA9-A3E5-08003A839DA4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{96101099-E3FD-4CA9-A3E5-08003A839DA4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{96101099-E3FD-4CA9-A3E5-08003A839DA4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10C54556-5F22-4443-BE36-DD1B8E432399}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10C54556-5F22-4443-BE36-DD1B8E432399}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10C54556-5F22-4443-BE36-DD1B8E432399}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10C54556-5F22-4443-BE36-DD1B8E432399}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

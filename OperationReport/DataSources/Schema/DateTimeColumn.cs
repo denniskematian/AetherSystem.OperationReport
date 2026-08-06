@@ -15,7 +15,7 @@ public record DateTimeColumn : Column
             throw new ArgumentException($"DateTimeResolution ({(int)Resolution}) is not defined.", nameof(Resolution));
         
         if(Type is ColumnType.Real or ColumnType.Integer && Resolution is DateTimeResolution.Unspecified)
-            throw new ArgumentException($"DateTimeResolution ({(int)Resolution}) must for {Type} column.", nameof(Resolution));
+            throw new ArgumentException($"DateTimeResolution must Real or Integer for {Type} column.", nameof(Resolution));
 
         this.Resolution = Resolution;
         this.Offset = Offset;

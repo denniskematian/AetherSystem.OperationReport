@@ -1,4 +1,3 @@
-using AetherSystem.OperationReport.DataSources.Schema;
 using Microsoft.Data.Sqlite;
 using SqlKata;
 using SqlKata.Compilers;
@@ -30,7 +29,7 @@ public abstract class SqliteAdapter : IAsyncDisposable
     protected SqliteCommand CreateExecutableCommand(Query query)
     {
         var command = CreateExecutableCommand();
-        var compiled = Compile(query);
+        var compiled = s_compiler.Compile(query);
         command.CommandText = compiled.Sql;
         for(int i = 0; i < compiled.Bindings.Count; i++)
         {
@@ -38,11 +37,6 @@ public abstract class SqliteAdapter : IAsyncDisposable
         }
 
         return command;
-    }
-
-    private static SqlResult Compile(Query query)
-    {
-        return s_compiler.Compile(query);
     }
 
     protected SqliteCommand CreateExecutableCommand()
@@ -62,45 +56,5 @@ public abstract class SqliteAdapter : IAsyncDisposable
         var connection = new SqliteConnection($"Data Source={_filePath}");
         connection.Open();
         return connection;
-    }
-
-    protected Query CreateFilterQuery(Query query, DateTimeColumn timestampColumn, FilterQuery filterQuery)
-    {
-        switch (timestampColumn.Type)
-        {
-            case ColumnType.Integer or ColumnType.Real:
-            {
-                var resolver = new TimestampResolver(timestampColumn);
-                if (filterQuery.From.HasValue)
-                {
-                    var from = resolver.ToUnixTimestamp(filterQuery.From.Value);
-                    query = query.Where(timestampColumn.Name, ">=", from);
-                }
-                
-                if (filterQuery.To.HasValue)
-                {
-                    var to = resolver.ToUnixTimestamp(filterQuery.To.Value);
-                    query = query.Where(timestampColumn.Name, "<=", to);
-                }
-                break;
-            }
-
-            case ColumnType.Text:
-                if (filterQuery.From.HasValue)
-                {
-                    query = query.Where(timestampColumn.Name, ">=", filterQuery.From.Value);
-                }
-                
-                if (filterQuery.To.HasValue)
-                {
-                    query = query.Where(timestampColumn.Name, "<=", filterQuery.To);
-                }
-                break;
-
-            default:
-                throw new NotSupportedException("Unsupported column type.");
-        }
-
-        return query;
     }
 }

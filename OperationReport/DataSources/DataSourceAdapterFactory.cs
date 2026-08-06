@@ -8,17 +8,17 @@ public class DataSourceAdapterFactory : IDataSourceAdapterFactory
         {
             FileType.Csv => new Csv.DataSourceAdapter(info),
             FileType.Sqlite => new Sqlite.DataSourceAdapter(info),
-            _ => throw new NotSupportedException($"Data source type {info.Type} is not supported.")
+            _ => throw new NotSupportedException($"Data source type ({(int)info.Type}) is not supported.")
         };
     }
 
-    public ISampleTableAdapter CreateSampleTableAdapter(SampleDataSourceInfo info)
+    public ISampleTableAdapter CreateSampleTableAdapter(SampleSourceInfo info)
     {
         return info.Type switch
         {
             FileType.Csv => new Csv.SampleTableAdapter(info),
             FileType.Sqlite => new Sqlite.SampleTableAdapter(info),
-            _ => throw new NotSupportedException($"Data source type {info.Type} is not supported.")
+            _ => throw new NotSupportedException($"Data source type ({(int)info.Type}) is not supported.")
         };
     }
 
@@ -28,7 +28,7 @@ public class DataSourceAdapterFactory : IDataSourceAdapterFactory
         {
             FileType.Csv => new Csv.OperationTableAdapter(info),
             FileType.Sqlite => new Sqlite.OperationTableAdapter(info),
-            _ => throw new NotSupportedException($"Data source type {info.Type} is not supported.")
+            _ => throw new NotSupportedException($"Data source type ({(int)info.Type}) is not supported.")
         };
     }
 
@@ -38,7 +38,7 @@ public class DataSourceAdapterFactory : IDataSourceAdapterFactory
         {
             FileType.Csv => new Csv.ReferenceTableAdapter(info),
             FileType.Sqlite => new Sqlite.ReferenceTableAdapter(info),
-            _ => throw new NotSupportedException($"Data source type {info.Type} is not supported.")
+            _ => throw new NotSupportedException($"Data source type ({(int)info.Type}) is not supported.")
         };
     }
 }

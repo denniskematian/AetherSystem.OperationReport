@@ -11,11 +11,33 @@ public record Table
         if(Columns.Count == 0)
             throw new ArgumentException("Columns cannot be empty");
         
-        var hashSet = new HashSet<Column>(Columns, ColumnNameComparer.Instance);
+        var hashSet = new HashSet<Column>(Columns, ColumnComparer.NameOnly);
         if(hashSet.Count != Columns.Count)
             throw new ArgumentException("Columns cannot contain duplicates");
 
         this.Name = Name;
         this.Columns = Columns;
+    }
+
+    public int IndexOf(Column column)
+    {
+        for(int i = 0; i < Columns.Count; i++)
+        {
+            if(Columns[i] == column)
+                return i;
+        }
+
+        return -1;
+    }
+
+    public int IndexOf(string columnName)
+    {
+        for(int i = 0; i < Columns.Count; i++)
+        {
+            if(Columns[i].Name == columnName)
+                return i;
+        }
+
+        return -1;
     }
 }

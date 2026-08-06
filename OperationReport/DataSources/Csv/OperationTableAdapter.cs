@@ -1,29 +1,28 @@
 using System.Runtime.CompilerServices;
-using AetherSystem.OperationReport.DataSources.Schema;
+using AetherSystem.OperationReport.DataSources.Converters;
 using AetherSystem.OperationReport.Entities;
 
 namespace AetherSystem.OperationReport.DataSources.Csv;
 
 public class OperationTableAdapter(OperationSourceInfo info) : CsvAdapter(info.FilePath), IOperationTableAdapter
 {
-    private int _timestampColumnIndex = -1;
-    private int _commentColumnIndex = -1;
+    private readonly int _timestampColumnIndex = info.TimestampColumnIndex;
+    private readonly int _commentColumnIndex = info.CommentColumnIndex;
+    private readonly ITimestampConverter _timestampConverter = TimestampConverter.ForColumn(info.TimestampColumn);
 
     public async Task<int> CountAsync(FilterQuery filterQuery, CancellationToken cancellationToken = default)
     {
         using var csvReader = await CreateCsvReader();
 
         var count = 0;
-        var tsColumnIndex = GetTimestampColumnIndex();
-        var resolver = new TimestampResolver(info.TimestampColumn);
         while (await csvReader.ReadAsync())
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (csvReader.Parser.Record is not { } row)
                 continue;
 
-            var timestamp = resolver.ToDateTime(row[tsColumnIndex]);
-            if(!IsMatchFilter(filterQuery, info.TimestampColumn, timestamp))
+            var timestamp = _timestampConverter.ToDateTime(row[_timestampColumnIndex]);
+            if(!IsMatchFilter(filterQuery, timestamp))
                 continue;
 
             count++;
@@ -37,41 +36,35 @@ public class OperationTableAdapter(OperationSourceInfo info) : CsvAdapter(info.F
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         using var csvReader = await CreateCsvReader();
-        var resolver = new TimestampResolver(info.TimestampColumn);
-        var timestampColumnIndex = GetTimestampColumnIndex();
-        var commentColumnIndex = GetCommentColumnIndex();
         while (await csvReader.ReadAsync())
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (csvReader.Parser.Record is not { } row)
                 continue;
-            
-            var timestamp = resolver.ToDateTime(row[timestampColumnIndex]);
-            if(!IsMatchFilter(filterQuery, info.TimestampColumn, timestamp))
+
+            var timestamp = _timestampConverter.ToDateTime(row[_timestampColumnIndex]);
+            if(!IsMatchFilter(filterQuery, timestamp))
                 continue;
             
-            var comment = row[commentColumnIndex];
+            var comment = row[_commentColumnIndex];
             yield return new Operation(timestamp, comment);
         }
     }
 
-    private int GetTimestampColumnIndex()
+    private bool IsMatchFilter(FilterQuery filterQuery, DateTime timestamp)
     {
-        if (_timestampColumnIndex < 0)
+        if (filterQuery.From.HasValue)
         {
-            _timestampColumnIndex = info.Table.Columns.Index().First(tc => tc.Item.Name == info.TimestampColumn.Name).Index;
+            var from = _timestampConverter.ToDateTime(filterQuery.From.Value);
+            if(timestamp < from) return false;
         }
-
-        return _timestampColumnIndex;
-    }
-
-    private int GetCommentColumnIndex()
-    {
-        if (_commentColumnIndex < 0)
+        
+        if (filterQuery.To.HasValue)
         {
-            _commentColumnIndex = info.Table.Columns.Index().First(tc => tc.Item.Name == info.CommentColumn.Name).Index;
+            var to = _timestampConverter.ToDateTime(filterQuery.To.Value);
+            if(timestamp > to) return false;
         }
-
-        return _commentColumnIndex;
+        
+        return true;
     }
 }

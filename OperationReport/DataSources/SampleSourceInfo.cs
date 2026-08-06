@@ -2,14 +2,16 @@ using AetherSystem.OperationReport.DataSources.Schema;
 
 namespace AetherSystem.OperationReport.DataSources;
 
-public sealed record SampleDataSourceInfo : DataSourceInfo
+public sealed record SampleSourceInfo : DataSourceInfo
 {
-    public Table Table { get; init; }
-    public DateTimeColumn TimestampColumn { get; init; }
-    public Column? BatchNumberColumn { get; init; }
-    public IReadOnlyList<Column> SampleColumns { get; init; }
+    public Table Table { get; }
+    public DateTimeColumn TimestampColumn { get; }
+    public Column? BatchNumberColumn { get; }
+    public IReadOnlyList<Column> SampleColumns { get; }
     
-    public SampleDataSourceInfo(
+    public bool HasBatchNumberColumn => BatchNumberColumn is not null;
+    
+    public SampleSourceInfo(
         string FilePath, 
         FileType Type,
         Table Table,
@@ -17,12 +19,12 @@ public sealed record SampleDataSourceInfo : DataSourceInfo
         Column? BatchNumberColumn,
         IReadOnlyList<Column> SampleColumns) : base(FilePath, Type)
     {
-        if(Table.Columns.All(column => column.Name != TimestampColumn.Name))
+        if(Table.Columns.All(column => !ColumnComparer.NameAndType.Equals(column, TimestampColumn)))
             throw new ArgumentException($"Timestamp column '{TimestampColumn.Name}' not found in table");
 
         if (BatchNumberColumn is not null)
         {
-            if(Table.Columns.All(column => column.Name != BatchNumberColumn.Name))
+            if(Table.Columns.All(column => !ColumnComparer.NameAndType.Equals(column, BatchNumberColumn)))
                 throw new ArgumentException($"Batch number '{BatchNumberColumn.Name}' column not found in table");
             
             if(BatchNumberColumn.Type is not ColumnType.Integer)
@@ -31,7 +33,7 @@ public sealed record SampleDataSourceInfo : DataSourceInfo
 
         foreach (var sampleColumn in SampleColumns)
         {
-            if(Table.Columns.All(column => column.Name != sampleColumn.Name))
+            if(Table.Columns.All(column => !ColumnComparer.NameAndType.Equals(column, sampleColumn)))
                 throw new ArgumentException($"Sample column '{sampleColumn.Name}' not found in table");
         }
         
@@ -39,5 +41,12 @@ public sealed record SampleDataSourceInfo : DataSourceInfo
         this.TimestampColumn = TimestampColumn;
         this.BatchNumberColumn = BatchNumberColumn;
         this.SampleColumns = SampleColumns;
+    }
+    
+    public int TimestampColumnIndex => Table.IndexOf(TimestampColumn);
+    public int? BatchNumberColumnIndex => BatchNumberColumn is null ? null : Table.IndexOf(BatchNumberColumn);
+    public IReadOnlyList<int> GetSampleColumnIndices()
+    {
+        return [.. SampleColumns.Select(c => Table.IndexOf(c))];
     }
 }

@@ -1,13 +1,15 @@
 using System.Runtime.CompilerServices;
+using AetherSystem.OperationReport.DataSources.Converters;
 using AetherSystem.OperationReport.DataSources.Schema;
 using AetherSystem.OperationReport.Entities;
 
 namespace AetherSystem.OperationReport.DataSources.Csv;
 
-public class SampleTableAdapter(SampleDataSourceInfo info) : CsvAdapter(info.FilePath), ISampleTableAdapter
+public class SampleTableAdapter(SampleSourceInfo info) : CsvAdapter(info.FilePath), ISampleTableAdapter
 {
-    private int _timestampColumnIndex = -1;
-    private int _batchNumberColumnIndex = -1;
+    private readonly int _timestampColumnIndex = info.TimestampColumnIndex;
+    private readonly int _batchNumberColumnIndex = info.BatchNumberColumnIndex ?? -1;
+    private readonly ITimestampConverter _timestampConverter = TimestampConverter.ForColumn(info.TimestampColumn);
 
     public IReadOnlyList<Column> SampleColumns => info.SampleColumns;
     public DateTimeColumn TimestampColumn => info.TimestampColumn;
@@ -18,16 +20,14 @@ public class SampleTableAdapter(SampleDataSourceInfo info) : CsvAdapter(info.Fil
         using var csvReader = await CreateCsvReader();
 
         var count = 0;
-        var tsColumnIndex = GetTimestampColumnIndex();
-        var resolver = new TimestampResolver(TimestampColumn);
         while (await csvReader.ReadAsync())
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (csvReader.Parser.Record is not { } row)
                 continue;
 
-            var timestamp = resolver.ToDateTime(row[tsColumnIndex]);
-            if(!IsMatchFilter(filterQuery, info.TimestampColumn, timestamp, row))
+            var timestamp = _timestampConverter.ToDateTime(row[_timestampColumnIndex]);
+            if(!IsMatchFilter(filterQuery, timestamp, row))
                 continue;
 
             count++;
@@ -41,11 +41,7 @@ public class SampleTableAdapter(SampleDataSourceInfo info) : CsvAdapter(info.Fil
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         using var csvReader = await CreateCsvReader();
-        var resolver = new TimestampResolver(TimestampColumn);
-        var tsColumnIndex = GetTimestampColumnIndex();
-        var indexes = SampleColumns
-            .Select(c => info.Table.Columns.Index().First(tc => tc.Item.Name == c.Name).Index)
-            .ToArray();
+        var indexes = info.GetSampleColumnIndices();
 
         while (await csvReader.ReadAsync())
         {
@@ -53,12 +49,12 @@ public class SampleTableAdapter(SampleDataSourceInfo info) : CsvAdapter(info.Fil
             if (csvReader.Parser.Record is not { } row)
                 continue;
             
-            var timestamp = resolver.ToDateTime(row[tsColumnIndex]);
-            if(!IsMatchFilter(filterQuery, info.TimestampColumn, timestamp, row))
+            var timestamp = _timestampConverter.ToDateTime(row[_timestampColumnIndex]);
+            if(!IsMatchFilter(filterQuery, timestamp, row))
                 continue;
 
             var sampleValues = new double[SampleColumns.Count];
-            for (int i = 0; i < indexes.Length; i++)
+            for (int i = 0; i < indexes.Count; i++)
             {
                 var index = indexes[i];
                 var value = row[index];
@@ -69,39 +65,24 @@ public class SampleTableAdapter(SampleDataSourceInfo info) : CsvAdapter(info.Fil
         }
     }
 
-    private bool IsMatchFilter(SampleFilterQuery filterQuery, DateTimeColumn infoTimestampColumn, DateTime timestamp, string[] row)
+    private bool IsMatchFilter(SampleFilterQuery filterQuery, DateTime timestamp, string[] row)
     {
-        if(!base.IsMatchFilter(filterQuery, infoTimestampColumn, timestamp))
-            return false;
+        if (filterQuery.From.HasValue)
+        {
+            var from = _timestampConverter.ToDateTime(filterQuery.From.Value);
+            if(timestamp < from) return false;
+        }
+        
+        if (filterQuery.To.HasValue)
+        {
+            var to = _timestampConverter.ToDateTime(filterQuery.To.Value);
+            if(timestamp > to) return false;
+        }
 
-        var batchNumberIndex = GetBatchNumberColumnIndex();
-        if(filterQuery.BatchNumber is null || batchNumberIndex is null)
+        if(filterQuery.BatchNumber is null || _batchNumberColumnIndex < 0)
             return true;
 
-        var batchNumber = Convert.ToInt32(row[batchNumberIndex.Value]);
+        var batchNumber = Convert.ToInt32(row[_batchNumberColumnIndex]);
         return batchNumber == filterQuery.BatchNumber;
-    }
-
-    private int GetTimestampColumnIndex()
-    {
-        if (_timestampColumnIndex < 0)
-        {
-            _timestampColumnIndex = info.Table.Columns.Index().First(tc => tc.Item.Name == info.TimestampColumn.Name).Index;
-        }
-
-        return _timestampColumnIndex;
-    }
-
-    private int? GetBatchNumberColumnIndex()
-    {
-        if(info.BatchNumberColumn is null)
-            return null;
-
-        if (_batchNumberColumnIndex < 0)
-        {
-            _batchNumberColumnIndex = info.Table.Columns.Index().First(tc => tc.Item.Name == info.BatchNumberColumn.Name).Index;
-        }
-
-        return _batchNumberColumnIndex;
     }
 }

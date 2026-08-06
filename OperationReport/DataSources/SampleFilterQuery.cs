@@ -1,4 +1,4 @@
 namespace AetherSystem.OperationReport.DataSources;
 
-public record SampleFilterQuery(DateTimeOffset? From, DateTimeOffset? To, int? BatchNumber) 
+public record SampleFilterQuery(DateTime? From, DateTime? To, int? BatchNumber) 
     : FilterQuery(From, To);

@@ -1,3 +1,3 @@
 namespace AetherSystem.OperationReport.DataSources;
 
-public record FilterQuery(DateTimeOffset? From, DateTimeOffset? To);
+public record FilterQuery(DateTime? From, DateTime? To);

@@ -15,14 +15,17 @@ public sealed record ReferenceSourceInfo : DataSourceInfo
         Column IdColumn,
         Column LabelColumn) : base(FilePath, Type)
     {
-        if(Table.Columns.All(column => column.Name != IdColumn.Name))
+        if(Table.Columns.All(column => !ColumnComparer.NameAndType.Equals(column, IdColumn)))
             throw new ArgumentException("ID column not found in table");
         
-        if(Table.Columns.All(column => column.Name != LabelColumn.Name))
+        if(Table.Columns.All(column => !ColumnComparer.NameAndType.Equals(column, LabelColumn)))
             throw new ArgumentException("Label column not found in table");
         
         this.Table = Table;
         this.IdColumn = IdColumn;
         this.LabelColumn = LabelColumn;
     }
+
+    public int IdColumnIndex => Table.IndexOf(IdColumn);
+    public int LabelColumnIndex => Table.IndexOf(LabelColumn);
 }
