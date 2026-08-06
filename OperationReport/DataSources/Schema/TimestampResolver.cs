@@ -1,3 +1,5 @@
+using System.ComponentModel;
+
 namespace AetherSystem.OperationReport.DataSources.Schema;
 
 public class TimestampResolver(DateTimeColumn column)
@@ -7,9 +9,11 @@ public class TimestampResolver(DateTimeColumn column)
         return column.Type switch
         {
             ColumnType.Text => Convert.ToDateTime(value),
-            ColumnType.Real => RealToDateTime(Convert.ToDouble(value)),
-            ColumnType.Integer => IntegerToDateTime(Convert.ToInt64(value)),
-            _ => throw new NotSupportedException("Unsupported column type."),
+            ColumnType.Real => RealToDateTime(column.Resolution, Convert.ToDouble(value)),
+            ColumnType.Integer => IntegerToDateTime(column.Resolution, Convert.ToInt64(value)),
+            // dotcover disable
+            _ => throw new InvalidEnumArgumentException($"Invalid ColumnType {(int)column.Type}."),
+            // dotcover enable
         };
     }
 
@@ -20,54 +24,44 @@ public class TimestampResolver(DateTimeColumn column)
         {
             DateTimeResolution.Milliseconds => value.ToUnixTimeMilliseconds(),
             DateTimeResolution.Seconds => value.ToUnixTimeSeconds(),
-            DateTimeResolution.Unspecified => throw new NotSupportedException("Unspecified datetime resolution."),
-            _ => throw new NotSupportedException($"Unsupported datetime resolution {column.Resolution}.")
+            // dotcover disable
+            DateTimeResolution.Unspecified => throw new InvalidEnumArgumentException("Unspecified DateTimeResolution."),
+            _ => throw new InvalidEnumArgumentException($"Invalid DateTimeResolution {(int)column.Resolution}.")
+            // dotcover enable
         };
     }
 
-    private DateTime RealToDateTime(double value)
+    public static DateTime RealToDateTime(DateTimeResolution resolution, double value)
     {
-        return column.Resolution switch
+        return resolution switch
         {
             DateTimeResolution.Milliseconds => FromFractionalMilliseconds(value),
             DateTimeResolution.Seconds => FromFractionalSeconds(value),
-            DateTimeResolution.Unspecified => throw new NotSupportedException("Unspecified datetime resolution."),
-            _ => throw new NotSupportedException($"Unsupported datetime resolution {column.Resolution}.")
+            DateTimeResolution.Unspecified => throw new InvalidEnumArgumentException("Unspecified DateTimeResolution."),
+            _ => throw new InvalidEnumArgumentException($"Invalid DateTimeResolution {(int)resolution}.")
         };
     }
 
-    private DateTime IntegerToDateTime(long value)
+    public static DateTime IntegerToDateTime(DateTimeResolution resolution, long value)
     {
-        return column.Resolution switch
+        return resolution switch
         {
             DateTimeResolution.Milliseconds => DateTimeOffset.FromUnixTimeMilliseconds(value).UtcDateTime,
             DateTimeResolution.Seconds => DateTimeOffset.FromUnixTimeSeconds(value).UtcDateTime,
-            DateTimeResolution.Unspecified => throw new NotSupportedException("Unspecified datetime resolution."),
-            _ => throw new NotSupportedException($"Unsupported datetime resolution {column.Resolution}.")
+            DateTimeResolution.Unspecified => throw new InvalidEnumArgumentException("Unspecified DateTimeResolution."),
+            _ => throw new InvalidEnumArgumentException($"Invalid DateTimeResolution {(int)resolution}.")
         };
     }
 
     private static DateTime FromFractionalSeconds(double unixSeconds)
     {
-        var whole = (long)unixSeconds;
-        var frac = unixSeconds - whole;
-
-        var dto = DateTimeOffset.FromUnixTimeSeconds(whole);
-
-        var ticks = (long)(frac * TimeSpan.TicksPerSecond);
-
-        return dto.AddTicks(ticks).UtcDateTime;
+        var ticks = checked((long)double.Round(unixSeconds * TimeSpan.TicksPerSecond));
+        return new DateTime(ticks);
     }
 
     private static DateTime FromFractionalMilliseconds(double unixMilliseconds)
     {
-        var whole = (long)unixMilliseconds;
-        var frac = unixMilliseconds - whole;
-
-        var dto = DateTimeOffset.FromUnixTimeMilliseconds(whole);
-
-        var ticks = (long)(frac * TimeSpan.TicksPerMillisecond);
-
-        return dto.AddTicks(ticks).UtcDateTime;
+        var ticks = checked((long)double.Round(unixMilliseconds * TimeSpan.TicksPerMillisecond));
+        return new DateTime(ticks);
     }
 }
