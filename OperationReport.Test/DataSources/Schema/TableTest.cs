@@ -20,10 +20,11 @@ public class TableTest
             { new Column("column", ColumnType.Real), 0 },
             { new Column("column2", ColumnType.Integer), 1 },
             { new Column("column3", ColumnType.Text), 2 },
+            { new Column("column4", ColumnType.Text), 3 },
+            { new DateTimeColumn("column", ColumnType.Real, DateTimeResolution.Seconds), 0 },
+            { new DateTimeColumn("column2", ColumnType.Integer, DateTimeResolution.Seconds), 1 },
+            { new DateTimeColumn("column3", ColumnType.Text), 2 },
             { new DateTimeColumn("column4", ColumnType.Text), 3 },
-            { new DateTimeColumn("column", ColumnType.Real, DateTimeResolution.Seconds), -1 },
-            { new DateTimeColumn("column2", ColumnType.Integer, DateTimeResolution.Seconds), -1 },
-            { new DateTimeColumn("column3", ColumnType.Text), -1 },
             { new Column(" column ", ColumnType.Real), -1 },
             { new Column("column2 ", ColumnType.Integer), -1 },
             { new Column(" column3", ColumnType.Text), -1 },
@@ -32,7 +33,7 @@ public class TableTest
 
     [Theory]
     [MemberData(nameof(CreationData))]
-    public void ShouldInitializeWithCorrectNameAndColumns(string tableName, string[] columnNames)
+    public void Constructor_ShouldInitializeWithCorrectNameAndColumns(string tableName, string[] columnNames)
     {
         var columns = columnNames.Select(name => new Column(name, ColumnType.Text)).ToArray();
         var table = new Table(tableName, columns);
@@ -44,21 +45,21 @@ public class TableTest
     [InlineData("")]
     [InlineData("  ")]
     [InlineData("\r\n\n\r")]
-    public void ShouldThrowsIfEmptyName(string tableName)
+    public void Constructor_ShouldThrowsIfEmptyName(string tableName)
     {
         Assert.ThrowsAny<ArgumentException>(
             () => new Table(tableName, [new Column("column", ColumnType.Real)]));
     }
     
     [Fact]
-    public void ShouldThrowsIfEmptyColumns()
+    public void Constructor_ShouldThrowsIfEmptyColumns()
     {
         Assert.ThrowsAny<ArgumentException>(
             () => new Table("tableName", []));
     }
     
     [Fact]
-    public void ShouldThrowsIfDuplicateColumns()
+    public void Constructor_ShouldThrowsIfDuplicateColumns()
     {
         Assert.ThrowsAny<ArgumentException>(
             () => new Table("tableName", [

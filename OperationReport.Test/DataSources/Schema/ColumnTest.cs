@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using AetherSystem.OperationReport.DataSources.Schema;
 
 namespace OperationReport.Test.DataSources.Schema;
@@ -11,7 +12,7 @@ public class ColumnTest
     [InlineData("column Name  ", ColumnType.Text)]
     [InlineData("  column Name", ColumnType.Text)]
     [InlineData("  column Name  ", ColumnType.Text)]
-    public void ShouldInitializesWithCorrectValues(string name, ColumnType type)
+    public void Constructor_ShouldInitializesWithCorrectValues(string name, ColumnType type)
     {
         var column = new Column(name, type);
         Assert.Equal(column.Name, name);
@@ -22,7 +23,7 @@ public class ColumnTest
     [InlineData("")]
     [InlineData("  ")]
     [InlineData("\r\n\n\r")]
-    public void ShouldThrowsIfEmptyName(string columnName)
+    public void Constructor_ShouldThrowsIfEmptyName(string columnName)
     {
         Assert.ThrowsAny<ArgumentException>(() => new Column(columnName, ColumnType.Real));
     }
@@ -31,8 +32,8 @@ public class ColumnTest
     [InlineData((ColumnType)(-1))]
     [InlineData((ColumnType)int.MinValue)]
     [InlineData((ColumnType)int.MaxValue)]
-    public void ShouldThrowsIfUndefinedType(ColumnType columnType)
+    public void Constructor_ShouldThrowsIfUndefinedType(ColumnType columnType)
     {
-        Assert.Throws<ArgumentException>(() => new Column("columnName", columnType));
+        Assert.Throws<InvalidEnumArgumentException>(() => new Column("columnName", columnType));
     }
 }

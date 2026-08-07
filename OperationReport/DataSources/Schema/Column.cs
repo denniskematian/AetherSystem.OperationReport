@@ -1,3 +1,5 @@
+using AetherSystem.OperationReport.Internals;
+
 namespace AetherSystem.OperationReport.DataSources.Schema;
 
 public record Column
@@ -5,13 +7,12 @@ public record Column
     public string Name { get; }
     public ColumnType Type { get; }
     
-    public Column(string Name, ColumnType Type)
+    public Column(string name, ColumnType type)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(Name);
-        if(!Enum.IsDefined(Type))
-            throw new ArgumentException($"ColumnType ({(int)Type}) is not defined.", nameof(Type));
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        ExceptionUtils.ThrowIfUndefined(type);
 
-        this.Name = Name;
-        this.Type = Type;
+        Name = name;
+        Type = type;
     }
 }

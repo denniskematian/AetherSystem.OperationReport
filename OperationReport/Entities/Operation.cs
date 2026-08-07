@@ -1,3 +1,14 @@
 namespace AetherSystem.OperationReport.Entities;
 
-public record Operation(DateTime Timestamp, string Comment);
+public class Operation
+{
+    public DateTime Timestamp { get; }
+    public string Comment { get; }
+    
+    public Operation(DateTime timestamp, string comment)
+    {
+        ArgumentNullException.ThrowIfNull(comment);
+        Timestamp = timestamp;
+        Comment = comment;
+    }
+}

@@ -1,24 +1,14 @@
 ﻿namespace AetherSystem.OperationReport.DataSources.Converters;
 
-internal class UnixTimestampConverter(long ticksPerUnit, TimeSpan offset) : ITimestampConverter<long>
+internal class UnixTimestampConverter(long ticksPerUnit, TimeSpan offset) : ITimestampConverter
 {
-    public DateTime ToDateTime(long value)
+    public DateTime ToDateTime(IConvertible value)
     {
-        var ticks = checked(value * ticksPerUnit + offset.Ticks);
+        var ticks = checked(Convert.ToInt64(value) * ticksPerUnit + offset.Ticks);
         return new DateTime(ticks);
     }
 
-    public DateTime ToDateTime(object value)
-    {
-        return ToDateTime(Convert.ToInt64(value));
-    }
-
-    object ITimestampConverter.FromDateTime(DateTime value)
-    {
-        return FromDateTime(value);
-    }
-
-    public long FromDateTime(DateTime value)
+    public IConvertible FromDateTime(DateTime value)
     {
         return (value - offset).Ticks / ticksPerUnit;
     }

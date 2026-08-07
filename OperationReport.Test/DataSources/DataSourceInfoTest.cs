@@ -1,5 +1,5 @@
+using System.ComponentModel;
 using AetherSystem.OperationReport.DataSources;
-using AetherSystem.OperationReport.DataSources.Schema;
 
 namespace OperationReport.Test.DataSources;
 
@@ -8,26 +8,34 @@ public class DataSourceInfoTest
     [Theory]
     [InlineData("data.db", FileType.Sqlite)]
     [InlineData("data.csv", FileType.Csv)]
-    public void DataSourceInfo_ShouldInitializesCorrectly(string filePath, FileType fileType)
+    public void Constructor_ShouldInitializesCorrectly(string filePath, FileType fileType)
     {
         var value = new DataSourceInfo(filePath, fileType);
         Assert.Equal(filePath, value.FilePath);
         Assert.Equal(fileType, value.Type);
     }
-    
-    public static TheoryData<Column> ReferenceSourceInfo_ShouldThrowsIfIdNotExists_TestData()
+
+    [Theory]
+    [InlineData((FileType)int.MinValue)]
+    [InlineData((FileType)int.MaxValue)]
+    public void Constructor_ShouldThrowsIfUndefinedFileType(FileType fileType)
     {
-        return
-        [
-            new Column("column4", ColumnType.Text),
-            new Column("column1 ", ColumnType.Text),
-            new Column(" column1", ColumnType.Text),
-            new Column(" column1 ", ColumnType.Text),
-            new Column("column1", ColumnType.Integer),
-            new Column("column2", ColumnType.Real),
-            new DateTimeColumn("column1", ColumnType.Text),
-        ];
+        Assert.Throws<InvalidEnumArgumentException>(() => new DataSourceInfo("data.db", fileType));
     }
+    
+    // public static TheoryData<Column> ReferenceSourceInfo_ShouldThrowsIfIdNotExists_TestData()
+    // {
+    //     return
+    //     [
+    //         new Column("column4", ColumnType.Text),
+    //         new Column("column1 ", ColumnType.Text),
+    //         new Column(" column1", ColumnType.Text),
+    //         new Column(" column1 ", ColumnType.Text),
+    //         new Column("column1", ColumnType.Integer),
+    //         new Column("column2", ColumnType.Real),
+    //         new DateTimeColumn("column1", ColumnType.Text),
+    //     ];
+    // }
 
     [Theory]
     [InlineData((FileType)(-1))]
@@ -35,35 +43,35 @@ public class DataSourceInfoTest
     [InlineData((FileType)int.MaxValue)]
     public void DataSourceInfo_ShouldThrowsIfUndefinedType(FileType type)
     {
-        Assert.Throws<ArgumentException>(() => new DataSourceInfo("test", type));
+        Assert.Throws<InvalidEnumArgumentException>(() => new DataSourceInfo("test", type));
     }
     
-    [Fact]
-    public void ReferenceSourceInfo_ShouldInitializesCorrectly()
-    {
-        var table = new Table("table", [
-            new Column("id", ColumnType.Integer),
-            new Column("label", ColumnType.Text),
-        ]);
-        
-        var value = new ReferenceSourceInfo("data.db", FileType.Sqlite, table, table.Columns[0], table.Columns[1]);
-        Assert.Equal(table.Columns[0], value.IdColumn);
-        Assert.Equal(table.Columns[1], value.LabelColumn);
-        Assert.Equal(table, value.Table);
-    }
-    
-    [Fact]
-    public void ReferenceSourceInfo_ShouldNotThrowsIfEquals()
-    {
-        var table = new Table("table", [
-            new Column("id", ColumnType.Integer),
-            new Column("label", ColumnType.Text),
-        ]);
-        
-        var value = new ReferenceSourceInfo("data.db", FileType.Sqlite, table, table.Columns[0], table.Columns[1]);
-        Assert.Equal(value.IdColumn, new Column("id", ColumnType.Integer));
-        Assert.Equal(value.LabelColumn, new Column("label", ColumnType.Text));
-    }
+    // [Fact]
+    // public void ReferenceSourceInfo_ShouldInitializesCorrectly()
+    // {
+    //     var table = new Table("table", [
+    //         new Column("id", ColumnType.Integer),
+    //         new Column("label", ColumnType.Text),
+    //     ]);
+    //     
+    //     var value = new ReferenceSourceInfo("data.db", FileType.Sqlite, table, table.Columns[0], table.Columns[1]);
+    //     Assert.Equal(table.Columns[0], value.IdColumn);
+    //     Assert.Equal(table.Columns[1], value.LabelColumn);
+    //     Assert.Equal(table, value.Table);
+    // }
+    //
+    // [Fact]
+    // public void ReferenceSourceInfo_ShouldNotThrowsIfEquals()
+    // {
+    //     var table = new Table("table", [
+    //         new Column("id", ColumnType.Integer),
+    //         new Column("label", ColumnType.Text),
+    //     ]);
+    //     
+    //     var value = new ReferenceSourceInfo("data.db", FileType.Sqlite, table, table.Columns[0], table.Columns[1]);
+    //     Assert.Equal(value.IdColumn, new Column("id", ColumnType.Integer));
+    //     Assert.Equal(value.LabelColumn, new Column("label", ColumnType.Text));
+    // }
     
     // [Theory]
     // [InlineData("column4", ColumnType.Text)]

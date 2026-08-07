@@ -1,4 +1,14 @@
+using AetherSystem.OperationReport.Internals;
+
 namespace AetherSystem.OperationReport.Entities;
 
-public record OperationSample(DateTime Timestamp, string Comment, IReadOnlyList<double> Values)
-    : Operation(Timestamp, Comment);
+public class OperationSample : Operation
+{
+    public IReadOnlyList<double> Values { get; }
+    
+    public OperationSample(DateTime timestamp, string comment, IReadOnlyList<double> values) : base(timestamp, comment)
+    {
+        ExceptionUtils.ThrowIfEmpty(values);
+        Values = values;
+    }
+}

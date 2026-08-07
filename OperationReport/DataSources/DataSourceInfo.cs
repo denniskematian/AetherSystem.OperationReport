@@ -1,3 +1,5 @@
+using AetherSystem.OperationReport.Internals;
+
 namespace AetherSystem.OperationReport.DataSources;
 
 public record DataSourceInfo
@@ -5,12 +7,12 @@ public record DataSourceInfo
     public string FilePath { get; }
     public FileType Type { get; }
     
-    public DataSourceInfo(string FilePath, FileType Type)
+    public DataSourceInfo(string filePath, FileType type)
     {
-        if(!Enum.IsDefined(Type))
-            throw new ArgumentException($"Invalid file type ({(int)Type})");
+        ArgumentException.ThrowIfNullOrEmpty(filePath);
+        ExceptionUtils.ThrowIfUndefined(type);
 
-        this.FilePath = FilePath;
-        this.Type = Type;
+        FilePath = filePath;
+        Type = type;
     }
 }

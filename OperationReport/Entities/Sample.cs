@@ -1,3 +1,16 @@
+using AetherSystem.OperationReport.Internals;
+
 namespace AetherSystem.OperationReport.Entities;
 
-public record Sample(DateTime Timestamp, IReadOnlyList<double> Values);
+public class Sample
+{
+    public DateTime Timestamp { get; }
+    public IReadOnlyList<double> Values { get; }
+    
+    public Sample(DateTime timestamp, IReadOnlyList<double> values)
+    {
+        ExceptionUtils.ThrowIfEmpty(values);
+        Timestamp = timestamp;
+        Values = values;
+    }
+}

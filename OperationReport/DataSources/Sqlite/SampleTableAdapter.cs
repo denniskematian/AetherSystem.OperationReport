@@ -39,7 +39,7 @@ public class SampleTableAdapter(SampleSourceInfo sourceInfo)
         {
             var samples = new double[SampleColumns.Count];
             
-            var timestamp = _timestampConverter.ToDateTime(reader.GetValue(0));
+            var timestamp = _timestampConverter.ToDateTime((IConvertible)reader.GetValue(0));
             for(int i = 0; i < SampleColumns.Count; i++)
                 samples[i] = Convert.ToDouble(reader.GetValue(i + 1));
             yield return new Sample(timestamp, samples.AsReadOnly());

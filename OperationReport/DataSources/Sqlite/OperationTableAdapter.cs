@@ -33,7 +33,7 @@ public class OperationTableAdapter(OperationSourceInfo sourceInfo)
         var reader = await command.ExecuteReaderAsync(cancellationToken);
         while (await reader.ReadAsync(cancellationToken))
         {
-            var timestamp = _timestampConverter.ToDateTime(reader.GetValue(0));
+            var timestamp = _timestampConverter.ToDateTime((IConvertible)reader.GetValue(0));
             var comment = reader.GetString(1);
             yield return new Operation(timestamp, comment);
         }

@@ -9,24 +9,24 @@ public sealed record OperationSourceInfo : DataSourceInfo
     public Column CommentColumn { get; }
     
     public OperationSourceInfo(
-        string FilePath,
-        FileType Type,
-        Table Table,
-        DateTimeColumn TimestampColumn,
-        Column CommentColumn) : base(FilePath, Type)
+        string filePath,
+        FileType type,
+        Table table,
+        DateTimeColumn timestampColumn,
+        Column commentColumn) : base(filePath, type)
     {
-        if(Table.Columns.All(column => !ColumnComparer.NameAndType.Equals(column, TimestampColumn)))
-            throw new ArgumentException($"Timestamp column '{TimestampColumn.Name}' not found in table");
+        if(table.Columns.All(column => !ColumnComparer.NameAndType.Equals(column, timestampColumn)))
+            throw new ArgumentException($"Timestamp column '{timestampColumn.Name}' not found in table");
 
-        if(Table.Columns.All(column => !ColumnComparer.NameAndType.Equals(column, CommentColumn)))
-            throw new ArgumentException($"Comment column '{CommentColumn.Name}' not found in table");
+        if(table.Columns.All(column => !ColumnComparer.NameAndType.Equals(column, commentColumn)))
+            throw new ArgumentException($"Comment column '{commentColumn.Name}' not found in table");
 
-        if(CommentColumn.Type is not ColumnType.Text)
-            throw new ArgumentException($"Comment column '{CommentColumn.Name}' must be of type text");
+        if(commentColumn.Type is not ColumnType.Text)
+            throw new ArgumentException($"Comment column '{commentColumn.Name}' must be of type text");
 
-        this.Table = Table;
-        this.TimestampColumn = TimestampColumn;
-        this.CommentColumn = CommentColumn;
+        Table = table;
+        TimestampColumn = timestampColumn;
+        CommentColumn = commentColumn;
     }
 
     public int TimestampColumnIndex => Table.IndexOf(TimestampColumn);

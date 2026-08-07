@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using AetherSystem.OperationReport.DataSources.Schema;
 
 namespace OperationReport.Test.DataSources.Schema;
@@ -26,20 +27,20 @@ public class DateTimeColumnTest
     [Theory]
     [InlineData(ColumnType.Integer)]
     [InlineData(ColumnType.Real)]
-    public void ShouldThrowsIfUnspecifiedNumericType(ColumnType columnType)
+    public void Constructor_ShouldThrowsIfUnspecifiedNumericType(ColumnType columnType)
     {
         Assert.Throws<ArgumentException>(() => new DateTimeColumn(
-            Name: "columnName",
-            Type: columnType,
-            Resolution: DateTimeResolution.Unspecified));
+            name: "columnName",
+            type: columnType,
+            resolution: DateTimeResolution.Unspecified));
     }
     
     [Theory]
     [InlineData((DateTimeResolution)(-1))]
     [InlineData((DateTimeResolution)int.MinValue)]
     [InlineData((DateTimeResolution)int.MaxValue)]
-    public void ShouldThrowsIfUndefinedResolution(DateTimeResolution resolution)
+    public void Constructor_ShouldThrowsIfUndefinedResolution(DateTimeResolution resolution)
     {
-        Assert.Throws<ArgumentException>(() => new DateTimeColumn("columnName", ColumnType.Real, resolution));
+        Assert.Throws<InvalidEnumArgumentException>(() => new DateTimeColumn("columnName", ColumnType.Real, resolution));
     }
 }

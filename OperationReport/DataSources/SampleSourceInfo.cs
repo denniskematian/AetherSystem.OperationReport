@@ -12,35 +12,39 @@ public sealed record SampleSourceInfo : DataSourceInfo
     public bool HasBatchNumberColumn => BatchNumberColumn is not null;
     
     public SampleSourceInfo(
-        string FilePath, 
-        FileType Type,
-        Table Table,
-        DateTimeColumn TimestampColumn,
-        Column? BatchNumberColumn,
-        IReadOnlyList<Column> SampleColumns) : base(FilePath, Type)
+        string filePath, 
+        FileType type,
+        Table table,
+        DateTimeColumn timestampColumn,
+        Column? batchNumberColumn,
+        IReadOnlyList<Column> sampleColumns) : base(filePath, type)
     {
-        if(Table.Columns.All(column => !ColumnComparer.NameAndType.Equals(column, TimestampColumn)))
-            throw new ArgumentException($"Timestamp column '{TimestampColumn.Name}' not found in table");
+        if(table.Columns.All(column => !ColumnComparer.NameAndType.Equals(column, timestampColumn)))
+            throw new ArgumentException($"Timestamp column '{timestampColumn.Name}' not found in table");
 
-        if (BatchNumberColumn is not null)
+        if (batchNumberColumn is not null)
         {
-            if(Table.Columns.All(column => !ColumnComparer.NameAndType.Equals(column, BatchNumberColumn)))
-                throw new ArgumentException($"Batch number '{BatchNumberColumn.Name}' column not found in table");
+            if(table.Columns.All(column => !ColumnComparer.NameAndType.Equals(column, batchNumberColumn)))
+                throw new ArgumentException($"Batch number '{batchNumberColumn.Name}' column not found in table");
             
-            if(BatchNumberColumn.Type is not ColumnType.Integer)
-                throw new ArgumentException($"Batch number column '{BatchNumberColumn.Name}' must be of type integer");
+            if(batchNumberColumn.Type is not ColumnType.Integer)
+                throw new ArgumentException($"Batch number column '{batchNumberColumn.Name}' must be type of integer");
         }
 
-        foreach (var sampleColumn in SampleColumns)
+        foreach (var sampleColumn in sampleColumns)
         {
-            if(Table.Columns.All(column => !ColumnComparer.NameAndType.Equals(column, sampleColumn)))
+            var underlyingColumn = table.Columns.FirstOrDefault(column => ColumnComparer.NameAndType.Equals(column, sampleColumn));
+            if(underlyingColumn is null)
                 throw new ArgumentException($"Sample column '{sampleColumn.Name}' not found in table");
+            
+            if(underlyingColumn.Type is not (ColumnType.Real or ColumnType.Integer))
+                throw new ArgumentException($"Underlying sample column '{sampleColumn.Name}' must be type of real or integer");
         }
         
-        this.Table = Table;
-        this.TimestampColumn = TimestampColumn;
-        this.BatchNumberColumn = BatchNumberColumn;
-        this.SampleColumns = SampleColumns;
+        Table = table;
+        TimestampColumn = timestampColumn;
+        BatchNumberColumn = batchNumberColumn;
+        SampleColumns = sampleColumns;
     }
     
     public int TimestampColumnIndex => Table.IndexOf(TimestampColumn);

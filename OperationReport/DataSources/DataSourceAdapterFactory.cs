@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace AetherSystem.OperationReport.DataSources;
 
 public class DataSourceAdapterFactory : IDataSourceAdapterFactory
@@ -8,7 +10,7 @@ public class DataSourceAdapterFactory : IDataSourceAdapterFactory
         {
             FileType.Csv => new Csv.DataSourceAdapter(info),
             FileType.Sqlite => new Sqlite.DataSourceAdapter(info),
-            _ => throw new NotSupportedException($"Data source type ({(int)info.Type}) is not supported.")
+            _ => throw new UnreachableException(),
         };
     }
 
@@ -18,7 +20,7 @@ public class DataSourceAdapterFactory : IDataSourceAdapterFactory
         {
             FileType.Csv => new Csv.SampleTableAdapter(info),
             FileType.Sqlite => new Sqlite.SampleTableAdapter(info),
-            _ => throw new NotSupportedException($"Data source type ({(int)info.Type}) is not supported.")
+            _ => throw new UnreachableException(),
         };
     }
 
@@ -28,7 +30,7 @@ public class DataSourceAdapterFactory : IDataSourceAdapterFactory
         {
             FileType.Csv => new Csv.OperationTableAdapter(info),
             FileType.Sqlite => new Sqlite.OperationTableAdapter(info),
-            _ => throw new NotSupportedException($"Data source type ({(int)info.Type}) is not supported.")
+            _ => throw new UnreachableException(),
         };
     }
 
@@ -38,7 +40,7 @@ public class DataSourceAdapterFactory : IDataSourceAdapterFactory
         {
             FileType.Csv => new Csv.ReferenceTableAdapter(info),
             FileType.Sqlite => new Sqlite.ReferenceTableAdapter(info),
-            _ => throw new NotSupportedException($"Data source type ({(int)info.Type}) is not supported.")
+            _ => throw new UnreachableException(),
         };
     }
 }

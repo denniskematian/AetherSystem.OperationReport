@@ -1,3 +1,6 @@
+using System.ComponentModel;
+using AetherSystem.OperationReport.Internals;
+
 namespace AetherSystem.OperationReport.DataSources.Schema;
 
 public record DateTimeColumn : Column
@@ -6,18 +9,16 @@ public record DateTimeColumn : Column
     public TimeSpan Offset { get; }
     
     public DateTimeColumn(
-        string Name,
-        ColumnType Type,
-        DateTimeResolution Resolution = DateTimeResolution.Unspecified,
-        TimeSpan Offset = default) : base(Name, Type)
+        string name,
+        ColumnType type,
+        DateTimeResolution resolution = DateTimeResolution.Unspecified,
+        TimeSpan offset = default) : base(name, type)
     {
-        if(!Enum.IsDefined(Resolution))
-            throw new ArgumentException($"DateTimeResolution ({(int)Resolution}) is not defined.", nameof(Resolution));
-        
-        if(Type is ColumnType.Real or ColumnType.Integer && Resolution is DateTimeResolution.Unspecified)
-            throw new ArgumentException($"DateTimeResolution must Real or Integer for {Type} column.", nameof(Resolution));
+        ExceptionUtils.ThrowIfUndefined(resolution);
+        if(type is ColumnType.Real or ColumnType.Integer && resolution is not (DateTimeResolution.Milliseconds or DateTimeResolution.Seconds))
+            throw new ArgumentException($"DateTimeResolution must Real or Integer for {type} column.", nameof(resolution));
 
-        this.Resolution = Resolution;
-        this.Offset = Offset;
+        Resolution = resolution;
+        Offset = offset;
     }
 }
