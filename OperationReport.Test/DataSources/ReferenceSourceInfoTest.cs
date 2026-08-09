@@ -1,10 +1,17 @@
 using AetherSystem.OperationReport.DataSources;
 using AetherSystem.OperationReport.DataSources.Schema;
+using AetherSystem.OperationReport.Timestamps;
 
 namespace OperationReport.Test.DataSources;
 
 public class ReferenceSourceInfoTest
 {
+    private static TimestampColumn CreateTextTimestampColumn(string name) =>
+        new TimestampColumn(name, ColumnType.Text, new StringTimestampFormat("yyyy-MM-dd HH:mm:ss"));
+
+    private static TimestampColumn CreateIntegerTimestampColumn(string name) =>
+        new TimestampColumn(name, ColumnType.Integer, new UnixTimestampFormat(TimestampResolution.Millisecond, TimeSpan.Zero));
+
     [Fact]
     public void Constructor_ShouldInitializesCorrectly()
     {
@@ -54,7 +61,7 @@ public class ReferenceSourceInfoTest
         Assert.Equal(table.IndexOf(value.IdColumn), value.IdColumnIndex);
         Assert.Equal(table.IndexOf(table.Columns[0]), value.IdColumnIndex);
         Assert.Equal(table.IndexOf(new Column("id", ColumnType.Integer)), value.IdColumnIndex);
-        Assert.Equal(table.IndexOf(new DateTimeColumn("id", ColumnType.Integer, DateTimeResolution.Seconds)), value.IdColumnIndex);
+        Assert.Equal(table.IndexOf(CreateIntegerTimestampColumn("id")), value.IdColumnIndex);
     }
     
     [Fact]
@@ -70,6 +77,6 @@ public class ReferenceSourceInfoTest
         Assert.Equal(table.IndexOf(value.LabelColumn), value.LabelColumnIndex);
         Assert.Equal(table.IndexOf(table.Columns[1]), value.LabelColumnIndex);
         Assert.Equal(table.IndexOf(new Column("label", ColumnType.Text)), value.LabelColumnIndex);
-        Assert.Equal(table.IndexOf(new DateTimeColumn("label", ColumnType.Text)), value.LabelColumnIndex);
+        Assert.Equal(table.IndexOf(CreateTextTimestampColumn("label")), value.LabelColumnIndex);
     }
 }

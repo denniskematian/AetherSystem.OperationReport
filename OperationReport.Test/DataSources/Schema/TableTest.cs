@@ -1,4 +1,5 @@
 using AetherSystem.OperationReport.DataSources.Schema;
+using AetherSystem.OperationReport.Timestamps;
 
 namespace OperationReport.Test.DataSources.Schema;
 
@@ -21,10 +22,10 @@ public class TableTest
             { new Column("column2", ColumnType.Integer), 1 },
             { new Column("column3", ColumnType.Text), 2 },
             { new Column("column4", ColumnType.Text), 3 },
-            { new DateTimeColumn("column", ColumnType.Real, DateTimeResolution.Seconds), 0 },
-            { new DateTimeColumn("column2", ColumnType.Integer, DateTimeResolution.Seconds), 1 },
-            { new DateTimeColumn("column3", ColumnType.Text), 2 },
-            { new DateTimeColumn("column4", ColumnType.Text), 3 },
+            { new TimestampColumn("column", ColumnType.Real, new FractionalUnixTimestampFormat(TimestampResolution.Second, TimeSpan.Zero)), 0 },
+            { new TimestampColumn("column2", ColumnType.Integer, new UnixTimestampFormat(TimestampResolution.Second, TimeSpan.Zero)), 1 },
+            { new TimestampColumn("column3", ColumnType.Integer, new StringTimestampFormat("O")), 2 },
+            { new TimestampColumn("column4", ColumnType.Text, new StringTimestampFormat("O")), 3 },
             { new Column(" column ", ColumnType.Real), -1 },
             { new Column("column2 ", ColumnType.Integer), -1 },
             { new Column(" column3", ColumnType.Text), -1 },
@@ -82,7 +83,7 @@ public class TableTest
             new Column("column", ColumnType.Real),
             new Column("column2", ColumnType.Integer),
             new Column("column3", ColumnType.Text),
-            new DateTimeColumn("column4", ColumnType.Text),
+            new TimestampColumn("column4", ColumnType.Text, new StringTimestampFormat("O")),
         ]);
         
         Assert.Equal(expected, table.IndexOf(columnName));
@@ -96,7 +97,7 @@ public class TableTest
             new Column("column", ColumnType.Real),
             new Column("column2", ColumnType.Integer),
             new Column("column3", ColumnType.Text),
-            new DateTimeColumn("column4", ColumnType.Text),
+            new TimestampColumn("column4", ColumnType.Text, new StringTimestampFormat("O")),
         ]);
         
         Assert.Equal(expected, table.IndexOf(column));

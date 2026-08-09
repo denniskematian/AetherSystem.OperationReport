@@ -1,5 +1,4 @@
 using System.Runtime.CompilerServices;
-using AetherSystem.OperationReport.DataSources.Converters;
 using AetherSystem.OperationReport.DataSources.Schema;
 using AetherSystem.OperationReport.Entities;
 using SqlKata;
@@ -10,10 +9,8 @@ namespace AetherSystem.OperationReport.DataSources.Sqlite;
 public class SampleTableAdapter(SampleSourceInfo sourceInfo)
     : SqliteAdapter(sourceInfo.FilePath), ISampleTableAdapter
 {
-    private readonly ITimestampConverter _timestampConverter = TimestampConverter.ForColumn(sourceInfo.TimestampColumn);
-    
     public IReadOnlyList<Column> SampleColumns => sourceInfo.SampleColumns;
-    public DateTimeColumn TimestampColumn => sourceInfo.TimestampColumn;
+    public TimestampColumn TimestampColumn => sourceInfo.TimestampColumn;
     public Column? BatchNumberColumn => sourceInfo.BatchNumberColumn;
 
     public async Task<int> CountAsync(SampleFilterQuery filterQuery, CancellationToken cancellationToken = default)
@@ -35,11 +32,12 @@ public class SampleTableAdapter(SampleSourceInfo sourceInfo)
         await using var command = CreateExecutableCommand(query);
 
         var reader = await command.ExecuteReaderAsync(cancellationToken);
+        var converter = sourceInfo.TimestampColumn.Format.Converter;
         while (await reader.ReadAsync(cancellationToken))
         {
             var samples = new double[SampleColumns.Count];
             
-            var timestamp = _timestampConverter.ToDateTime((IConvertible)reader.GetValue(0));
+            var timestamp = converter.ToDateTime((IConvertible)reader.GetValue(0));
             for(int i = 0; i < SampleColumns.Count; i++)
                 samples[i] = Convert.ToDouble(reader.GetValue(i + 1));
             yield return new Sample(timestamp, samples.AsReadOnly());
@@ -50,16 +48,17 @@ public class SampleTableAdapter(SampleSourceInfo sourceInfo)
     {
         var table = sourceInfo.Table.Name;
         var query = new Query(table);
+        var converter = sourceInfo.TimestampColumn.Format.Converter;
         
         if (filterQuery.From is not null)
         {
-            var value = _timestampConverter.FromDateTime(filterQuery.From.Value);
+            var value = converter.FromDateTime(filterQuery.From.Value);
             query = query.Where(sourceInfo.TimestampColumn.Name, ">=", value);
         }
 
         if (filterQuery.To is not null)
         {
-            var value = _timestampConverter.FromDateTime(filterQuery.To.Value);
+            var value = converter.FromDateTime(filterQuery.To.Value);
             query = query.Where(sourceInfo.TimestampColumn.Name, "<=", value);
         }
 

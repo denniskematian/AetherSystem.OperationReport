@@ -1,5 +1,4 @@
 using System.Runtime.CompilerServices;
-using AetherSystem.OperationReport.DataSources.Converters;
 using AetherSystem.OperationReport.DataSources.Schema;
 using AetherSystem.OperationReport.Entities;
 
@@ -9,10 +8,9 @@ public class SampleTableAdapter(SampleSourceInfo info) : CsvAdapter(info.FilePat
 {
     private readonly int _timestampColumnIndex = info.TimestampColumnIndex;
     private readonly int _batchNumberColumnIndex = info.BatchNumberColumnIndex ?? -1;
-    private readonly ITimestampConverter _timestampConverter = TimestampConverter.ForColumn(info.TimestampColumn);
 
     public IReadOnlyList<Column> SampleColumns => info.SampleColumns;
-    public DateTimeColumn TimestampColumn => info.TimestampColumn;
+    public TimestampColumn TimestampColumn => info.TimestampColumn;
     public Column? BatchNumberColumn => info.BatchNumberColumn;
     
     public async Task<int> CountAsync(SampleFilterQuery filterQuery, CancellationToken cancellationToken = default)
@@ -20,13 +18,14 @@ public class SampleTableAdapter(SampleSourceInfo info) : CsvAdapter(info.FilePat
         using var csvReader = await CreateCsvReader();
 
         var count = 0;
+        var converter = info.TimestampColumn.Format.Converter;
         while (await csvReader.ReadAsync())
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (csvReader.Parser.Record is not { } row)
                 continue;
 
-            var timestamp = _timestampConverter.ToDateTime(row[_timestampColumnIndex]);
+            var timestamp = converter.ToDateTime(row[_timestampColumnIndex]);
             if(!IsMatchFilter(filterQuery, timestamp, row))
                 continue;
 
@@ -43,13 +42,14 @@ public class SampleTableAdapter(SampleSourceInfo info) : CsvAdapter(info.FilePat
         using var csvReader = await CreateCsvReader();
         var indexes = info.GetSampleColumnIndices();
 
+        var converter = info.TimestampColumn.Format.Converter;
         while (await csvReader.ReadAsync())
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (csvReader.Parser.Record is not { } row)
                 continue;
             
-            var timestamp = _timestampConverter.ToDateTime(row[_timestampColumnIndex]);
+            var timestamp = converter.ToDateTime(row[_timestampColumnIndex]);
             if(!IsMatchFilter(filterQuery, timestamp, row))
                 continue;
 
@@ -67,15 +67,16 @@ public class SampleTableAdapter(SampleSourceInfo info) : CsvAdapter(info.FilePat
 
     private bool IsMatchFilter(SampleFilterQuery filterQuery, DateTime timestamp, string[] row)
     {
+        var converter = info.TimestampColumn.Format.Converter;
         if (filterQuery.From.HasValue)
         {
-            var from = _timestampConverter.ToDateTime(filterQuery.From.Value);
+            var from = converter.ToDateTime(filterQuery.From.Value);
             if(timestamp < from) return false;
         }
         
         if (filterQuery.To.HasValue)
         {
-            var to = _timestampConverter.ToDateTime(filterQuery.To.Value);
+            var to = converter.ToDateTime(filterQuery.To.Value);
             if(timestamp > to) return false;
         }
 

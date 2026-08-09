@@ -1,10 +1,17 @@
 using AetherSystem.OperationReport.DataSources;
 using AetherSystem.OperationReport.DataSources.Schema;
+using AetherSystem.OperationReport.Timestamps;
 
 namespace OperationReport.Test.DataSources;
 
 public class SampleSourceInfoTest
 {
+    private static TimestampColumn CreateTextTimestampColumn(string name = "timestamp") =>
+        new TimestampColumn(name, ColumnType.Text, new StringTimestampFormat("yyyy-MM-dd HH:mm:ss"));
+
+    private static TimestampColumn CreateIntegerTimestampColumn(string name = "timestamp") =>
+        new TimestampColumn(name, ColumnType.Integer, new UnixTimestampFormat(TimestampResolution.Millisecond, TimeSpan.Zero));
+
     private List<Column> GetValidColumns()
     {
         return [
@@ -24,13 +31,13 @@ public class SampleSourceInfoTest
     {
         return [..GetValidColumns().Where(c => c.Name.StartsWith("sample"))];
     }
-
+    
     [Fact]
     public void Constructor_ShouldInitializesCorrectly()
     {
         var columns = GetValidColumns();
         var table = new Table("table", columns);
-        var timestampColumn = new DateTimeColumn("timestamp", ColumnType.Text);
+        var timestampColumn = CreateTextTimestampColumn();
         var batchNumberColumn = columns[1];
         var sampleColumns = GetSampleColumns();
         
@@ -52,10 +59,10 @@ public class SampleSourceInfoTest
     {
         var columns = GetValidColumns();
         var table = new Table("table", columns);
-        var timestampColumn = new DateTimeColumn("timestamp", ColumnType.Text);
+        var timestampColumn = CreateTextTimestampColumn();
         var batchNumberColumn = new Column("program_no", ColumnType.Integer);
         var sampleColumns = GetSampleColumns();
-
+    
         Assert.Throws<ArgumentException>(() =>
             new SampleSourceInfo("data.db", FileType.Sqlite, table, timestampColumn, batchNumberColumn, sampleColumns));
     }
@@ -65,17 +72,17 @@ public class SampleSourceInfoTest
     {
         var columns = GetValidColumns();
         var table = new Table("table", columns);
-        var timestampColumn = new DateTimeColumn("timestamp", ColumnType.Text);
+        var timestampColumn = CreateTextTimestampColumn();
         var batchNumberColumn = new Column("batch_number", ColumnType.Real);
         columns[1] = batchNumberColumn;
         var sampleColumns = GetSampleColumns();
-
+    
         Assert.Throws<ArgumentException>(() =>
             new SampleSourceInfo("data.db", FileType.Sqlite, table, timestampColumn, batchNumberColumn, sampleColumns));
         
         batchNumberColumn = new Column("batch_number", ColumnType.Text);
         columns[1] = batchNumberColumn;
-
+    
         Assert.Throws<ArgumentException>(() =>
             new SampleSourceInfo("data.db", FileType.Sqlite, table, timestampColumn, batchNumberColumn, sampleColumns));
     }
@@ -85,14 +92,14 @@ public class SampleSourceInfoTest
     {
         var columns = GetValidColumns();
         var table = new Table("table", columns);
-        var timestampColumn = new DateTimeColumn("datetime", ColumnType.Text);
+        var timestampColumn = CreateTextTimestampColumn("datetime");
         var batchNumberColumn = columns[1];
         var sampleColumns = GetSampleColumns();
-
+    
         Assert.Throws<ArgumentException>(() =>
             new SampleSourceInfo("data.db", FileType.Sqlite, table, timestampColumn, batchNumberColumn, sampleColumns));
         
-        timestampColumn = new DateTimeColumn("timestamp", ColumnType.Integer, DateTimeResolution.Milliseconds);
+        timestampColumn = CreateIntegerTimestampColumn();
         Assert.Throws<ArgumentException>(() =>
             new SampleSourceInfo("data.db", FileType.Sqlite, table, timestampColumn, batchNumberColumn, sampleColumns));
     }
@@ -102,9 +109,9 @@ public class SampleSourceInfoTest
     {
         var columns = GetValidColumns();
         var table = new Table("table", columns);
-        var timestampColumn = new DateTimeColumn("timestamp", ColumnType.Text);
+        var timestampColumn = CreateTextTimestampColumn();
         var batchNumberColumn = new Column("batch_number", ColumnType.Integer);
-
+    
         List<Column> sampleColumns = [..GetSampleColumns(), new Column("sample99", ColumnType.Real)];
         Assert.Throws<ArgumentException>(() =>
             new SampleSourceInfo("data.db", FileType.Sqlite, table, timestampColumn, batchNumberColumn, sampleColumns));
@@ -115,20 +122,20 @@ public class SampleSourceInfoTest
     {
         var columns = GetValidColumns();
         var table = new Table("table", columns);
-        var timestampColumn = new DateTimeColumn("timestamp", ColumnType.Text);
+        var timestampColumn = CreateTextTimestampColumn();
         var batchNumberColumn = new Column("batch_number", ColumnType.Integer);
         List<Column> sampleColumns = [..GetSampleColumns(), new ("text_column", ColumnType.Text)];
         
         Assert.Throws<ArgumentException>(() =>
             new SampleSourceInfo("data.db", FileType.Sqlite, table, timestampColumn, batchNumberColumn, sampleColumns));
     }
-
+    
     [Fact]
     public void TimestampColumnIndex_IsIndexOfColumn()
     {
         var columns = GetValidColumns();
         var table = new Table("table", columns);
-        var timestampColumn = new DateTimeColumn("timestamp", ColumnType.Text);
+        var timestampColumn = CreateTextTimestampColumn();
         var batchNumberColumn = columns[1];
         var sampleColumns = GetSampleColumns();
         
@@ -138,15 +145,15 @@ public class SampleSourceInfoTest
         Assert.Equal(table.IndexOf(value.TimestampColumn), value.TimestampColumnIndex);
         Assert.Equal(table.IndexOf(table.Columns[0]), value.TimestampColumnIndex);
         Assert.Equal(table.IndexOf(new Column("timestamp", ColumnType.Text)), value.TimestampColumnIndex);
-        Assert.Equal(table.IndexOf(new DateTimeColumn("timestamp", ColumnType.Text)), value.TimestampColumnIndex);
+        Assert.Equal(table.IndexOf(CreateTextTimestampColumn()), value.TimestampColumnIndex);
     }
-
+    
     [Fact]
     public void BatchNumberColumnIndex_IsIndexOfColumn()
     {
         var columns = GetValidColumns();
         var table = new Table("table", columns);
-        var timestampColumn = new DateTimeColumn("timestamp", ColumnType.Text);
+        var timestampColumn = CreateTextTimestampColumn();
         var batchNumberColumn = columns[1];
         var sampleColumns = GetSampleColumns();
         
@@ -156,15 +163,15 @@ public class SampleSourceInfoTest
         Assert.Equal(table.IndexOf(value.BatchNumberColumn!), value.BatchNumberColumnIndex);
         Assert.Equal(table.IndexOf(table.Columns[1]), value.BatchNumberColumnIndex);
         Assert.Equal(table.IndexOf(new Column("batch_number", ColumnType.Integer)), value.BatchNumberColumnIndex);
-        Assert.Equal(table.IndexOf(new DateTimeColumn("batch_number", ColumnType.Integer, DateTimeResolution.Milliseconds)), value.BatchNumberColumnIndex);
+        Assert.Equal(table.IndexOf(CreateIntegerTimestampColumn("batch_number")), value.BatchNumberColumnIndex);
     }
-
+    
     [Fact]
     public void BatchNumberColumnIndex_IsNullIfNotProvided()
     {
         var columns = GetValidColumns();
         var table = new Table("table", columns);
-        var timestampColumn = new DateTimeColumn("timestamp", ColumnType.Text);
+        var timestampColumn = CreateTextTimestampColumn();
         var sampleColumns = GetSampleColumns();
         
         var value = new SampleSourceInfo("data.db", FileType.Sqlite, table, timestampColumn, null, sampleColumns);
@@ -177,7 +184,7 @@ public class SampleSourceInfoTest
     {
         var columns = GetValidColumns();
         var table = new Table("table", columns);
-        var timestampColumn = new DateTimeColumn("timestamp", ColumnType.Text);
+        var timestampColumn = CreateTextTimestampColumn();
         var batchNumberColumn = columns[1];
         var sampleColumns = GetSampleColumns();
         
@@ -185,25 +192,25 @@ public class SampleSourceInfoTest
         var indexes = value.GetSampleColumnIndices();
         Assert.Equal([3, 4, 5, 6, 7, 8], indexes);
     }
-
+    
     [Fact]
     public void HasBatchNumberColumn_IsFalseIfNotProvided()
     {
         var columns = GetValidColumns();
         var table = new Table("table", columns);
-        var timestampColumn = new DateTimeColumn("timestamp", ColumnType.Text);
+        var timestampColumn = CreateTextTimestampColumn();
         var sampleColumns = GetSampleColumns();
         
         var value = new SampleSourceInfo("data.db", FileType.Sqlite, table, timestampColumn, null, sampleColumns);
         Assert.False(value.HasBatchNumberColumn);
     }
-
+    
     [Fact]
     public void HasBatchNumberColumn_IsTrueIfProvided()
     {
         var columns = GetValidColumns();
         var table = new Table("table", columns);
-        var timestampColumn = new DateTimeColumn("timestamp", ColumnType.Text);
+        var timestampColumn = CreateTextTimestampColumn();
         var batchNumberColumn = columns[1];
         var sampleColumns = GetSampleColumns();
         

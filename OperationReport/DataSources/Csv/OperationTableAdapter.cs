@@ -1,5 +1,4 @@
 using System.Runtime.CompilerServices;
-using AetherSystem.OperationReport.DataSources.Converters;
 using AetherSystem.OperationReport.Entities;
 
 namespace AetherSystem.OperationReport.DataSources.Csv;
@@ -8,20 +7,20 @@ public class OperationTableAdapter(OperationSourceInfo info) : CsvAdapter(info.F
 {
     private readonly int _timestampColumnIndex = info.TimestampColumnIndex;
     private readonly int _commentColumnIndex = info.CommentColumnIndex;
-    private readonly ITimestampConverter _timestampConverter = TimestampConverter.ForColumn(info.TimestampColumn);
 
     public async Task<int> CountAsync(FilterQuery filterQuery, CancellationToken cancellationToken = default)
     {
         using var csvReader = await CreateCsvReader();
 
         var count = 0;
+        var converter = info.TimestampColumn.Format.Converter;
         while (await csvReader.ReadAsync())
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (csvReader.Parser.Record is not { } row)
                 continue;
 
-            var timestamp = _timestampConverter.ToDateTime(row[_timestampColumnIndex]);
+            var timestamp = converter.ToDateTime(row[_timestampColumnIndex]);
             if(!IsMatchFilter(filterQuery, timestamp))
                 continue;
 
@@ -36,13 +35,14 @@ public class OperationTableAdapter(OperationSourceInfo info) : CsvAdapter(info.F
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         using var csvReader = await CreateCsvReader();
+        var converter = info.TimestampColumn.Format.Converter;
         while (await csvReader.ReadAsync())
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (csvReader.Parser.Record is not { } row)
                 continue;
 
-            var timestamp = _timestampConverter.ToDateTime(row[_timestampColumnIndex]);
+            var timestamp = converter.ToDateTime(row[_timestampColumnIndex]);
             if(!IsMatchFilter(filterQuery, timestamp))
                 continue;
             
@@ -53,15 +53,16 @@ public class OperationTableAdapter(OperationSourceInfo info) : CsvAdapter(info.F
 
     private bool IsMatchFilter(FilterQuery filterQuery, DateTime timestamp)
     {
+        var converter = info.TimestampColumn.Format.Converter;
         if (filterQuery.From.HasValue)
         {
-            var from = _timestampConverter.ToDateTime(filterQuery.From.Value);
+            var from = converter.ToDateTime(filterQuery.From.Value);
             if(timestamp < from) return false;
         }
         
         if (filterQuery.To.HasValue)
         {
-            var to = _timestampConverter.ToDateTime(filterQuery.To.Value);
+            var to = converter.ToDateTime(filterQuery.To.Value);
             if(timestamp > to) return false;
         }
         

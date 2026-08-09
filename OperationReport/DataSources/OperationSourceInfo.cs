@@ -5,14 +5,14 @@ namespace AetherSystem.OperationReport.DataSources;
 public sealed record OperationSourceInfo : DataSourceInfo
 {
     public Table Table { get; }
-    public DateTimeColumn TimestampColumn { get; }
+    public TimestampColumn TimestampColumn { get; }
     public Column CommentColumn { get; }
     
     public OperationSourceInfo(
         string filePath,
         FileType type,
         Table table,
-        DateTimeColumn timestampColumn,
+        TimestampColumn timestampColumn,
         Column commentColumn) : base(filePath, type)
     {
         if(table.Columns.All(column => !ColumnComparer.NameAndType.Equals(column, timestampColumn)))

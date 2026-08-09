@@ -14,6 +14,12 @@ internal static class ExceptionUtils
     [DoesNotReturn]
     public static T ThrowUndefinedEnumException<T>(Enum enumValue, T? value = default)
         => throw new InvalidEnumArgumentException(StringResource.UndefinedEnum(enumValue));
+    
+    [DoesNotReturn]
+    public static T ThrowInvalidEnumArgument<T>(Enum value, [CallerArgumentExpression("value")] string? paramName = null)
+    {
+        throw new InvalidEnumArgumentException(paramName, Convert.ToInt32(value), value.GetType());
+    }
 
     public static void ThrowIfUndefined<T>(T enumValue) where T : Enum
     {

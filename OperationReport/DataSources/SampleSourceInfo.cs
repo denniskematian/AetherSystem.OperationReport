@@ -5,7 +5,7 @@ namespace AetherSystem.OperationReport.DataSources;
 public sealed record SampleSourceInfo : DataSourceInfo
 {
     public Table Table { get; }
-    public DateTimeColumn TimestampColumn { get; }
+    public TimestampColumn TimestampColumn { get; }
     public Column? BatchNumberColumn { get; }
     public IReadOnlyList<Column> SampleColumns { get; }
     
@@ -15,7 +15,7 @@ public sealed record SampleSourceInfo : DataSourceInfo
         string filePath, 
         FileType type,
         Table table,
-        DateTimeColumn timestampColumn,
+        TimestampColumn timestampColumn,
         Column? batchNumberColumn,
         IReadOnlyList<Column> sampleColumns) : base(filePath, type)
     {
