@@ -1,6 +1,6 @@
 using System.Collections;
 
-namespace AetherSystem.OperationReport.Timestamps;
+namespace AetherSystem.OperationReport.Collections;
 
 public class SegmentedArray<T> where T : unmanaged
 {

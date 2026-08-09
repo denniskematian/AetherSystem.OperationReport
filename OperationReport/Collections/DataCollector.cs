@@ -9,8 +9,8 @@ public sealed class DataCollector
     private readonly IOperationTableAdapter _operationTableAdapter;
     private readonly Dictionary<string, int> _sampleColumnIndexLookup;
 
-    private readonly SegmentedArrayPool<double> _sampleArrayPool;
-    private readonly SegmentedArrayPool<double> _operationArrayPool;
+    private readonly SegmentedArray<double> _sampleArrayPool;
+    private readonly SegmentedArray<double> _operationArrayPool;
     private readonly List<string> _operationComments = [];
     
     private readonly SemaphoreSlim _lock = new(1, 1);
@@ -23,8 +23,8 @@ public sealed class DataCollector
         _operationTableAdapter = operationTableAdapter;
         
         var segmentCount = sampleTableAdapter.SampleColumns.Count + 1;
-        _sampleArrayPool = new SegmentedArrayPool<double>(segmentCount);
-        _operationArrayPool = new SegmentedArrayPool<double>(segmentCount);
+        _sampleArrayPool = new SegmentedArray<double>(segmentCount);
+        _operationArrayPool = new SegmentedArray<double>(segmentCount);
         
         _sampleColumnIndexLookup = _sampleTableAdapter.SampleColumns.Index()
             .ToDictionary(c => c.Item.Name, c => c.Index + 1);
