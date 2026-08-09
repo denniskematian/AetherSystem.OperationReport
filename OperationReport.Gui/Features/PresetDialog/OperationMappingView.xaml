@@ -1,0 +1,58 @@
+<UserControl x:Class="AetherSystem.OperationReport.Gui.Features.PresetDialog.OperationMappingView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:AetherSystem.OperationReport.Gui.Features.PresetDialog"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=local:OperationMappingViewModel}"
+             d:DesignHeight="300" d:DesignWidth="300">
+  <Grid>
+    <GroupBox Grid.Row="0" Header="Operation Column Mapping" UseLayoutRounding="True"
+              Padding="10 8" Margin="10 8" BorderThickness="0"
+              Style="{DynamicResource MahApps.Styles.GroupBox.Clean}">
+      <AdornerDecorator>
+        <Grid>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+          </Grid.RowDefinitions>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+          </Grid.ColumnDefinitions>
+
+          <Label Grid.Row="0" Grid.Column="0" Content="Table" VerticalAlignment="Center" />
+          <ComboBox Grid.Row="0" Grid.Column="1" Margin="5"
+                    SelectedItem="{Binding OperationTable}"
+                    ItemsSource="{Binding Context.OperationTables}"
+                    DisplayMemberPath="Name" />
+
+          <Label Grid.Row="1" Grid.Column="0" Content="Timestamp Column" VerticalAlignment="Center" />
+          <ComboBox Grid.Row="1" Grid.Column="1" Margin="5"
+                    SelectedItem="{Binding OperationTimestampColumn}"
+                    ItemsSource="{Binding OperationTable.Columns, FallbackValue=[]}"
+                    DisplayMemberPath="Name" />
+
+          <Label Grid.Row="2" Grid.Column="0" DockPanel.Dock="Left" Content="Timestamp resolution"
+                 Visibility="{Binding OperationTimestampResolutionRequired, Converter={StaticResource BooleanToVisibilityConverter}}"
+                 VerticalAlignment="Center" />
+          <ComboBox Grid.Row="2" Grid.Column="1" Margin="5"
+                    Visibility="{Binding OperationTimestampResolutionRequired, Converter={StaticResource BooleanToVisibilityConverter}}"
+                    SelectedValue="{Binding OperationTimestampResolution}"
+                    ItemsSource="{Binding Source={x:Static local:Options.TimestampResolutions}}"
+                    SelectedValuePath="Value"
+                    DisplayMemberPath="Name"/>
+
+          <Label Grid.Row="3" Grid.Column="0" Content="Label Column" VerticalAlignment="Center" />
+          <ComboBox Grid.Row="3" Grid.Column="1" Margin="5"
+                    SelectedItem="{Binding OperationCommentColumn}"
+                    ItemsSource="{Binding OperationTextColumns}"
+                    DisplayMemberPath="Name" />
+        </Grid>
+      </AdornerDecorator>
+    </GroupBox>
+  </Grid>
+</UserControl>

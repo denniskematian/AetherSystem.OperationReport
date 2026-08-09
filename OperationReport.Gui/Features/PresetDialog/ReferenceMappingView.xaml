@@ -1,0 +1,47 @@
+<UserControl x:Class="AetherSystem.OperationReport.Gui.Features.PresetDialog.ReferenceMappingView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:AetherSystem.OperationReport.Gui.Features.PresetDialog"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=local:ReferenceMappingViewModel}"
+             d:DesignHeight="300" d:DesignWidth="300">
+  <Grid>
+    <GroupBox Grid.Row="0" Header="Sample Reference Column Mapping" UseLayoutRounding="True"
+              Padding="10 8" Margin="10 8" BorderThickness="0"
+              Style="{DynamicResource MahApps.Styles.GroupBox.Clean}">
+      <AdornerDecorator>
+        <Grid>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+          </Grid.RowDefinitions>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+          </Grid.ColumnDefinitions>
+
+          <Label Grid.Row="0" Grid.Column="0" Content="Table" VerticalAlignment="Center" />
+          <ComboBox Grid.Row="0" Grid.Column="1" Margin="5"
+                    SelectedItem="{Binding ReferenceTable}"
+                    ItemsSource="{Binding Context.ReferenceTables}"
+                    DisplayMemberPath="Name" />
+
+          <Label Grid.Row="1" Grid.Column="0" Content="ID Column" VerticalAlignment="Center" />
+          <ComboBox Grid.Row="1" Grid.Column="1" Margin="5"
+                    SelectedItem="{Binding ReferenceIdColumn}"
+                    ItemsSource="{Binding ReferenceIntegerColumns}"
+                    DisplayMemberPath="Name" />
+
+          <Label Grid.Row="2" Grid.Column="0" Content="Label Column" VerticalAlignment="Center" />
+          <ComboBox Grid.Row="2" Grid.Column="1" Margin="5"
+                    SelectedItem="{Binding ReferenceLabelColumn}"
+                    ItemsSource="{Binding ReferenceTextColumns}"
+                    DisplayMemberPath="Name" />
+        </Grid>
+      </AdornerDecorator>
+    </GroupBox>
+  </Grid>
+</UserControl>
