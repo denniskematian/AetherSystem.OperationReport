@@ -3,7 +3,7 @@ using AetherSystem.OperationReport.DataSources.Schema;
 
 namespace AetherSystem.OperationReport.DataSources.Csv;
 
-public class DataSourceAdapter(DataSourceInfo info) : CsvAdapter(info.FilePath), IDataSourceAdapter
+public sealed class DataSourceAdapter(DataSourceInfo info) : CsvAdapter(info.FilePath), IDataSourceAdapter
 {
     public async IAsyncEnumerable<Table> GetTablesAsync(
         [EnumeratorCancellation] CancellationToken cancellationToken = default)

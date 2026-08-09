@@ -4,7 +4,7 @@ using SqlKata;
 
 namespace AetherSystem.OperationReport.DataSources.Sqlite;
 
-public class ReferenceTableAdapter(ReferenceSourceInfo sourceInfo)
+public sealed class ReferenceTableAdapter(ReferenceSourceInfo sourceInfo)
     : SqliteAdapter(sourceInfo.FilePath), IReferenceTableAdapter
 {
     public async IAsyncEnumerable<SampleReference> EnumerateAsync(

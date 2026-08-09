@@ -3,7 +3,7 @@ using CsvHelper;
 
 namespace AetherSystem.OperationReport.DataSources.Csv;
 
-public abstract class CsvAdapter(string filePath)
+public abstract class CsvAdapter(string filePath) : IDisposable, IAsyncDisposable
 {
     protected async Task<CsvReader> CreateCsvReader()
     {
@@ -18,5 +18,16 @@ public abstract class CsvAdapter(string filePath)
     {
         if (!await reader.ReadAsync() || reader.Parser.Record is null)
             throw new InvalidOperationException("Unable to read header of CSV file.");
+    }
+
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        GC.SuppressFinalize(this);
+        await Task.CompletedTask;
     }
 }

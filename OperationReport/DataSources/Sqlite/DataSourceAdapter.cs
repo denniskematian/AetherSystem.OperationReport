@@ -5,7 +5,7 @@ using Column = AetherSystem.OperationReport.DataSources.Schema.Column;
 
 namespace AetherSystem.OperationReport.DataSources.Sqlite;
 
-public class DataSourceAdapter(DataSourceInfo info) : SqliteAdapter(info.FilePath), IDataSourceAdapter
+public sealed class DataSourceAdapter(DataSourceInfo info) : SqliteAdapter(info.FilePath), IDataSourceAdapter
 {
     public async IAsyncEnumerable<Table> GetTablesAsync(
         [EnumeratorCancellation] CancellationToken cancellationToken = default)

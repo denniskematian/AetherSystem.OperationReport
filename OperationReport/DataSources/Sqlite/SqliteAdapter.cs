@@ -4,7 +4,7 @@ using SqlKata.Compilers;
 
 namespace AetherSystem.OperationReport.DataSources.Sqlite;
 
-public abstract class SqliteAdapter : IAsyncDisposable
+public abstract class SqliteAdapter : IAsyncDisposable, IDisposable
 {
     private static readonly SqliteCompiler s_compiler = new();
 
@@ -22,8 +22,8 @@ public abstract class SqliteAdapter : IAsyncDisposable
     public ValueTask DisposeAsync()
     {
         GC.SuppressFinalize(this);
-        var connection = Interlocked.Exchange(ref _connection, null);
-        return connection?.DisposeAsync() ?? ValueTask.CompletedTask;
+        return Interlocked.Exchange(ref _connection, null)?.DisposeAsync() 
+               ?? ValueTask.CompletedTask;
     }
 
     protected SqliteCommand CreateExecutableCommand(Query query)
@@ -56,5 +56,11 @@ public abstract class SqliteAdapter : IAsyncDisposable
         var connection = new SqliteConnection($"Data Source={_filePath}");
         connection.Open();
         return connection;
+    }
+
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        Interlocked.Exchange(ref _connection, null)?.Dispose();
     }
 }

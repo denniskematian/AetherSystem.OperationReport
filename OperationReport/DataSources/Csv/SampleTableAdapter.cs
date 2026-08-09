@@ -4,7 +4,7 @@ using AetherSystem.OperationReport.Entities;
 
 namespace AetherSystem.OperationReport.DataSources.Csv;
 
-public class SampleTableAdapter(SampleSourceInfo info) : CsvAdapter(info.FilePath), ISampleTableAdapter
+public sealed class SampleTableAdapter(SampleSourceInfo info) : CsvAdapter(info.FilePath), ISampleTableAdapter
 {
     private readonly int _timestampColumnIndex = info.TimestampColumnIndex;
     private readonly int _batchNumberColumnIndex = info.BatchNumberColumnIndex ?? -1;

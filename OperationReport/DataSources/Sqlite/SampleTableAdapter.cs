@@ -6,7 +6,7 @@ using Column = AetherSystem.OperationReport.DataSources.Schema.Column;
 
 namespace AetherSystem.OperationReport.DataSources.Sqlite;
 
-public class SampleTableAdapter(SampleSourceInfo sourceInfo)
+public sealed class SampleTableAdapter(SampleSourceInfo sourceInfo)
     : SqliteAdapter(sourceInfo.FilePath), ISampleTableAdapter
 {
     public IReadOnlyList<Column> SampleColumns => sourceInfo.SampleColumns;

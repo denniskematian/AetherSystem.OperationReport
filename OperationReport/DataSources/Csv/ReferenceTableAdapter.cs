@@ -3,7 +3,7 @@ using AetherSystem.OperationReport.Entities;
 
 namespace AetherSystem.OperationReport.DataSources.Csv;
 
-public class ReferenceTableAdapter(ReferenceSourceInfo info) : CsvAdapter(info.FilePath), IReferenceTableAdapter
+public sealed class ReferenceTableAdapter(ReferenceSourceInfo info) : CsvAdapter(info.FilePath), IReferenceTableAdapter
 {
     private readonly int _idColumnIndex = info.IdColumnIndex;
     private readonly int _labelColumnIndex = info.LabelColumnIndex;

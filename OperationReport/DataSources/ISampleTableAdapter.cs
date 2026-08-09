@@ -3,7 +3,7 @@ using AetherSystem.OperationReport.Entities;
 
 namespace AetherSystem.OperationReport.DataSources;
 
-public interface ISampleTableAdapter
+public interface ISampleTableAdapter : IDisposable, IAsyncDisposable
 {
     IReadOnlyList<Column> SampleColumns { get; }
     TimestampColumn TimestampColumn { get; }

@@ -3,7 +3,7 @@ using AetherSystem.OperationReport.Entities;
 
 namespace AetherSystem.OperationReport.DataSources.Csv;
 
-public class OperationTableAdapter(OperationSourceInfo info) : CsvAdapter(info.FilePath), IOperationTableAdapter
+public sealed class OperationTableAdapter(OperationSourceInfo info) : CsvAdapter(info.FilePath), IOperationTableAdapter
 {
     private readonly int _timestampColumnIndex = info.TimestampColumnIndex;
     private readonly int _commentColumnIndex = info.CommentColumnIndex;

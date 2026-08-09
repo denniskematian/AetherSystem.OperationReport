@@ -4,7 +4,7 @@ using SqlKata;
 
 namespace AetherSystem.OperationReport.DataSources.Sqlite;
 
-public class OperationTableAdapter(OperationSourceInfo sourceInfo) 
+public sealed class OperationTableAdapter(OperationSourceInfo sourceInfo) 
     : SqliteAdapter(sourceInfo.FilePath), IOperationTableAdapter
 {
     public async Task<int> CountAsync(
