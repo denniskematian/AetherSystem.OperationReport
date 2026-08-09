@@ -24,7 +24,7 @@ public class TableTest
             { new Column("column4", ColumnType.Text), 3 },
             { new TimestampColumn("column", ColumnType.Real, new FractionalUnixTimestampFormat(TimestampResolution.Second, TimeSpan.Zero)), 0 },
             { new TimestampColumn("column2", ColumnType.Integer, new UnixTimestampFormat(TimestampResolution.Second, TimeSpan.Zero)), 1 },
-            { new TimestampColumn("column3", ColumnType.Integer, new StringTimestampFormat("O")), 2 },
+            { new TimestampColumn("column3", ColumnType.Text, new StringTimestampFormat("O")), 2 },
             { new TimestampColumn("column4", ColumnType.Text, new StringTimestampFormat("O")), 3 },
             { new Column(" column ", ColumnType.Real), -1 },
             { new Column("column2 ", ColumnType.Integer), -1 },
