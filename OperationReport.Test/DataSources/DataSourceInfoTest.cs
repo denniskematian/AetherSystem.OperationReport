@@ -12,7 +12,7 @@ public class DataSourceInfoTest
     {
         var value = new DataSourceInfo(filePath, fileType);
         Assert.Equal(filePath, value.FilePath);
-        Assert.Equal(fileType, value.Type);
+        Assert.Equal(fileType, value.FileType);
     }
 
     [Theory]

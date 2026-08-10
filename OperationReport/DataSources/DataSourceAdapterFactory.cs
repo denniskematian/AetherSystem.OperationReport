@@ -6,7 +6,7 @@ public class DataSourceAdapterFactory : IDataSourceAdapterFactory
 {
     public IDataSourceAdapter CreateDataSourceAdapter(DataSourceInfo info)
     {
-        return info.Type switch
+        return info.FileType switch
         {
             FileType.Csv => new Csv.DataSourceAdapter(info),
             FileType.Sqlite => new Sqlite.DataSourceAdapter(info),
@@ -16,7 +16,7 @@ public class DataSourceAdapterFactory : IDataSourceAdapterFactory
 
     public ISampleTableAdapter CreateSampleTableAdapter(SampleSourceInfo info)
     {
-        return info.Type switch
+        return info.FileType switch
         {
             FileType.Csv => new Csv.SampleTableAdapter(info),
             FileType.Sqlite => new Sqlite.SampleTableAdapter(info),
@@ -26,7 +26,7 @@ public class DataSourceAdapterFactory : IDataSourceAdapterFactory
 
     public IOperationTableAdapter CreateOperationTableAdapter(OperationSourceInfo info)
     {
-        return info.Type switch
+        return info.FileType switch
         {
             FileType.Csv => new Csv.OperationTableAdapter(info),
             FileType.Sqlite => new Sqlite.OperationTableAdapter(info),
@@ -36,7 +36,7 @@ public class DataSourceAdapterFactory : IDataSourceAdapterFactory
 
     public IReferenceTableAdapter CreateReferenceTableAdapter(ReferenceSourceInfo info)
     {
-        return info.Type switch
+        return info.FileType switch
         {
             FileType.Csv => new Csv.ReferenceTableAdapter(info),
             FileType.Sqlite => new Sqlite.ReferenceTableAdapter(info),

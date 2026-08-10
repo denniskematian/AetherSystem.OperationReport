@@ -11,9 +11,28 @@ public sealed class PresetConfigBuilder(PresetDialogContext context)
     private OperationSourceInfo? _operationDataSource;
     private IReadOnlyList<SampleReferenceConfig>? _sampleReferences;
     
-    public PresetConfigBuilder WithSampleDataSource(SampleSourceInfo dataSource)
+    public PresetConfigBuilder WithSampleDataSource(
+        IReadOnlyList<SampleReferenceConfig> references,
+        Table table,
+        Column timestampColumn,
+        TimestampResolution resolution,
+        Column? batchNumberColumn)
     {
-        _sampleDataSource = dataSource;
+        var sampleColumns = references
+            .Where(i => i.IsIncluded)
+            .Select(i => new Column(i.Column, ColumnType.Real))
+            .ToArray();
+
+        _sampleDataSource = new SampleSourceInfo(
+            context.SampleDataSource.FilePath,
+            context.SampleDataSource.FileType,
+            table,
+            CreateTimestampColumn(timestampColumn, resolution),
+            batchNumberColumn,
+            sampleColumns);
+
+        _sampleReferences = references;
+        
         return this;
     }
     
@@ -23,30 +42,13 @@ public sealed class PresetConfigBuilder(PresetDialogContext context)
         TimestampResolution resolution,
         Column commentColumn)
     {
-        ITimestampFormat timestampFormat = timestampColumn.Type switch
-        {
-            ColumnType.Integer => new UnixTimestampFormat(resolution),
-            ColumnType.Real => new FractionalUnixTimestampFormat(resolution),
-            ColumnType.Text => new StringTimestampFormat(),
-            _ => throw new InvalidOperationException("Unsupported timestamp column type")
-        };
-            
-        var tsColumn = new TimestampColumn(
-            timestampColumn.Name, 
-            timestampColumn.Type,
-            timestampFormat);
-        
         _operationDataSource = new OperationSourceInfo(
             context.OperationDataSource.FilePath,
             context.OperationDataSource.FileType,
-            table, tsColumn, commentColumn);
+            table, 
+            CreateTimestampColumn(timestampColumn, resolution), 
+            commentColumn);
 
-        return this;
-    }
-    
-    public PresetConfigBuilder WithSampleReferences(IReadOnlyList<SampleReferenceConfig> references)
-    {
-        _sampleReferences = references;
         return this;
     }
     
@@ -67,5 +69,21 @@ public sealed class PresetConfigBuilder(PresetDialogContext context)
             SampleDataSource = _sampleDataSource,
             SampleReferences = _sampleReferences
         };
+    }
+
+    private TimestampColumn CreateTimestampColumn(Column timestampColumn, TimestampResolution resolution)
+    {
+        ITimestampFormat timestampFormat = timestampColumn.Type switch
+        {
+            ColumnType.Integer => new UnixTimestampFormat(resolution),
+            ColumnType.Real => new FractionalUnixTimestampFormat(resolution),
+            ColumnType.Text => new StringTimestampFormat(),
+            _ => throw new InvalidOperationException("Unsupported timestamp column type")
+        };
+
+        return new TimestampColumn(
+            timestampColumn.Name, 
+            timestampColumn.Type,
+            timestampFormat);
     }
 }

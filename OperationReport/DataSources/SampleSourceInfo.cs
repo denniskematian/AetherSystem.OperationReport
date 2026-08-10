@@ -13,11 +13,11 @@ public sealed record SampleSourceInfo : DataSourceInfo
     
     public SampleSourceInfo(
         string filePath, 
-        FileType type,
+        FileType fileType,
         Table table,
         TimestampColumn timestampColumn,
         Column? batchNumberColumn,
-        IReadOnlyList<Column> sampleColumns) : base(filePath, type)
+        IReadOnlyList<Column> sampleColumns) : base(filePath, fileType)
     {
         if(table.Columns.All(column => !ColumnComparer.NameAndType.Equals(column, timestampColumn)))
             throw new ArgumentException($"Timestamp column '{timestampColumn.Name}' not found in table");

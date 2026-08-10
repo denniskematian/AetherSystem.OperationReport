@@ -17,6 +17,9 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private async Task CreatePreset()
     {
+        var result = Facades.DialogService.OpenPresetDialog();
+        if(result.IsFailed)
+            return;
         CurrentContent = new LoadingViewModel();
         await Task.Delay(1000);
         CurrentContent = new BlankViewModel();

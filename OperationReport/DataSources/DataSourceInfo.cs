@@ -5,14 +5,14 @@ namespace AetherSystem.OperationReport.DataSources;
 public record DataSourceInfo
 {
     public string FilePath { get; }
-    public FileType Type { get; }
+    public FileType FileType { get; }
     
-    public DataSourceInfo(string filePath, FileType type)
+    public DataSourceInfo(string filePath, FileType fileType)
     {
         ArgumentException.ThrowIfNullOrEmpty(filePath);
-        ExceptionUtils.ThrowIfUndefined(type);
+        ExceptionUtils.ThrowIfUndefined(fileType);
 
         FilePath = filePath;
-        Type = type;
+        FileType = fileType;
     }
 }

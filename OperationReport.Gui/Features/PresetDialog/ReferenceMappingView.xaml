@@ -6,7 +6,49 @@
              xmlns:local="clr-namespace:AetherSystem.OperationReport.Gui.Features.PresetDialog"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=local:ReferenceMappingViewModel}"
-             d:DesignHeight="300" d:DesignWidth="300">
+             d:DesignHeight="400" d:DesignWidth="400">
+  <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Orientation="Vertical" Margin="10 8" Grid.IsSharedSizeScope="True">
+      <TextBlock Text="Sample Reference Column Mapping" FontSize="14" FontWeight="Medium"/>
+      <Grid Margin="0 5 0 0">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition SharedSizeGroup="FormLabel"/>
+          <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Label Grid.Row="0" Grid.Column="0" Content="Table" VerticalAlignment="Center" />
+        <ComboBox Grid.Row="0" Grid.Column="1" Margin="5"
+                  SelectedItem="{Binding ReferenceTable}"
+                  ItemsSource="{Binding Context.ReferenceTables}"
+                  DisplayMemberPath="Name" />
+      </Grid>
+      <Grid Margin="0 5 0 0">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition SharedSizeGroup="FormLabel"/>
+          <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Label Grid.Column="0" Content="ID Column" VerticalAlignment="Center" />
+        <ComboBox Grid.Column="1" Margin="5"
+                  SelectedItem="{Binding ReferenceIdColumn}"
+                  ItemsSource="{Binding ReferenceIntegerColumns}"
+                  DisplayMemberPath="Name" />
+      </Grid>
+      <Grid Margin="0 5 0 0">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition SharedSizeGroup="FormLabel"/>
+          <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Label Grid.Column="0" Content="Label Column" VerticalAlignment="Center" />
+        <ComboBox Grid.Column="1" Margin="5"
+                  SelectedItem="{Binding ReferenceLabelColumn}"
+                  ItemsSource="{Binding ReferenceTextColumns}"
+                  DisplayMemberPath="Name" />
+      </Grid>
+    </StackPanel>
+  </ScrollViewer>
+  <!--
   <Grid>
     <GroupBox Grid.Row="0" Header="Sample Reference Column Mapping" UseLayoutRounding="True"
               Padding="10 8" Margin="10 8" BorderThickness="0"
@@ -44,4 +86,5 @@
       </AdornerDecorator>
     </GroupBox>
   </Grid>
+  -->
 </UserControl>

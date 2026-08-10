@@ -10,10 +10,10 @@ public sealed record OperationSourceInfo : DataSourceInfo
     
     public OperationSourceInfo(
         string filePath,
-        FileType type,
+        FileType fileType,
         Table table,
         TimestampColumn timestampColumn,
-        Column commentColumn) : base(filePath, type)
+        Column commentColumn) : base(filePath, fileType)
     {
         if(table.Columns.All(column => !ColumnComparer.NameAndType.Equals(column, timestampColumn)))
             throw new ArgumentException($"Timestamp column '{timestampColumn.Name}' not found in table");

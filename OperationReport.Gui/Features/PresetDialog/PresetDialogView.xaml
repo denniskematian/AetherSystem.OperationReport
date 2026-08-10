@@ -9,12 +9,25 @@
                  d:DataContext="{d:DesignInstance Type=local:PresetDialogViewModel}"
                  
                  WindowStartupLocation="CenterOwner"
-                 ResizeMode="CanResize"
+                 CornerPreference="DoNotRound"
                  Title="{Binding TitleText}"
-                 BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
-                 BorderThickness="1"
                  Height="720" Width="480"
                  MinHeight="600" MinWidth="400">
+  
+  <mah:MetroWindow.Resources>
+    <DataTemplate DataType="{x:Type local:DefineDataSourceViewModel}">
+      <local:DefineDataSourceView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type local:ReferenceMappingViewModel}">
+      <local:ReferenceMappingView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type local:SampleMappingViewModel}">
+      <local:SampleMappingView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type local:OperationMappingViewModel}">
+      <local:OperationMappingView />
+    </DataTemplate>
+  </mah:MetroWindow.Resources>
   <Grid>
     <Grid.RowDefinitions>
       <RowDefinition Height="*" />
@@ -31,6 +44,7 @@
         <Button Margin="3 0" Content="{Binding PreviousText}"
                 Command="{Binding PreviousPageCommand}" />
         <Button Margin="3 0" Content="{Binding NextText}"
+                Style="{DynamicResource MahApps.Styles.Button.Flat.Accent}"
                 Command="{Binding CurrentContent.ProceedCommand}"/>
       </StackPanel>
       <ProgressBar DockPanel.Dock="Left" Width="100" Height="10" IsIndeterminate="True"

@@ -1,0 +1,92 @@
+<UserControl x:Class="AetherSystem.OperationReport.Gui.Features.PresetDialog.SampleMappingView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:AetherSystem.OperationReport.Gui.Features.PresetDialog"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=local:SampleMappingViewModel}"
+             d:DesignHeight="300" d:DesignWidth="300">
+  <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Orientation="Vertical" Margin="10 8" Grid.IsSharedSizeScope="True">
+      <TextBlock Text="Sample Column Mapping" FontSize="14" FontWeight="Medium"/>
+      <Grid Margin="0 5 0 0">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition SharedSizeGroup="FormLabel"/>
+          <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Label Grid.Row="0" Grid.Column="0" DockPanel.Dock="Left" Content="Table"
+               VerticalAlignment="Center" />
+        <ComboBox Grid.Row="0" Grid.Column="1" Margin="5"
+                  SelectedItem="{Binding SampleTable}"
+                  ItemsSource="{Binding Context.SampleTables}"
+                  DisplayMemberPath="Name" />
+      </Grid>
+      <Grid Margin="0 5 0 0">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition SharedSizeGroup="FormLabel"/>
+          <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Label Grid.Column="0" DockPanel.Dock="Left" Content="Timestamp column"
+               VerticalAlignment="Center" />
+        <ComboBox Grid.Column="1" Margin="5"
+                  SelectedItem="{Binding SampleTimestampColumn}"
+                  ItemsSource="{Binding SampleTable.Columns, FallbackValue=[]}"
+                  DisplayMemberPath="Name" />
+      </Grid>
+      <Grid Margin="0 5 0 0">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition SharedSizeGroup="FormLabel"/>
+          <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Label Grid.Column="0" DockPanel.Dock="Left" Content="Timestamp resolution"
+               Visibility="{Binding SampleTimestampResolutionRequired, Converter={StaticResource BooleanToVisibilityConverter}}"
+               VerticalAlignment="Center" />
+        <ComboBox Grid.Column="1" Margin="5"
+                  Visibility="{Binding SampleTimestampResolutionRequired, Converter={StaticResource BooleanToVisibilityConverter}}"
+                  SelectedValue="{Binding SampleTimestampResolution}"
+                  SelectedValuePath="Value"
+                  ItemsSource="{Binding Source={x:Static local:Options.TimestampResolutions}}" 
+                  DisplayMemberPath="Name"/>
+      </Grid>
+      <Grid Margin="0 5 0 0">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition SharedSizeGroup="FormLabel"/>
+          <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Label Grid.Column="0" DockPanel.Dock="Left" Content="Batch number column"
+               VerticalAlignment="Center" />
+        <ComboBox Grid.Column="1" Margin="5"
+                  SelectedValue="{Binding SampleBatchNumberColumn}"
+                  SelectedValuePath="Value"
+                  ItemsSource="{Binding BatchNumberColumnOptions}"
+                  DisplayMemberPath="Name" />
+      </Grid>
+
+      <DataGrid SelectionUnit="FullRow"
+                BorderThickness="1"
+                HeadersVisibility="Column"
+                Margin="0 5 0 0"
+                ItemsSource="{Binding SampleReferences}"
+                AutoGenerateColumns="False"
+                CanUserAddRows="False"
+                CanUserDeleteRows="False"
+                SelectionMode="Single"
+                CanUserSortColumns="False"
+                CanUserReorderColumns="False"
+                GridLinesVisibility="Horizontal">
+        <DataGrid.Columns>
+          <DataGridCheckBoxColumn Header="Include" Binding="{Binding IsIncluded, Mode=TwoWay}" />
+          <DataGridTextColumn Header="Index" Binding="{Binding Index, Mode=TwoWay}" />
+          <DataGridTextColumn IsReadOnly="True" Header="Column"
+                              Binding="{Binding Column, Mode=OneTime}" />
+          <DataGridTextColumn Header="Label" Binding="{Binding Label, Mode=TwoWay}" />
+        </DataGrid.Columns>
+      </DataGrid>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

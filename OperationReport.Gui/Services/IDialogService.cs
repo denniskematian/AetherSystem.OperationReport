@@ -1,5 +1,8 @@
 using System.IO;
 using System.Windows;
+using AetherSystem.OperationReport.Gui.Features;
+using AetherSystem.OperationReport.Gui.Features.PresetDialog;
+using AetherSystem.OperationReport.ValueObjects;
 using FluentResults;
 using Microsoft.Win32;
 
@@ -11,6 +14,7 @@ public interface IDialogService
     Result<FileInfo> SaveFileDialog(string filter);
     Result ConfirmDialog(string message, string caption = "Confirm", MessageBoxImage icon = MessageBoxImage.None);
     void ErrorDialog(string message, string caption = "Error");
+    Result<PresetConfig> OpenPresetDialog();
 }
 
 internal class DialogService : IDialogService
@@ -49,5 +53,32 @@ internal class DialogService : IDialogService
     public void ErrorDialog(string message, string caption = "Error")
     {
         MessageBox.Show(message, caption, MessageBoxButton.OK, MessageBoxImage.Error);
+    }
+
+    public Result<PresetConfig> OpenPresetDialog()
+    {
+        var view = new PresetDialogView();
+        var viewModel = new PresetDialogViewModel();
+        return ShowDialog<PresetDialogViewModel, PresetConfig>(view, viewModel);
+    }
+
+    private Result<TResult> ShowDialog<TViewModel, TResult>(Window view, TViewModel viewModel) where TViewModel : DialogViewModel<TResult>
+    {
+        view.Owner = Application.Current.MainWindow;
+        view.DataContext = viewModel;
+        Result<TResult>? result = null;
+
+        viewModel.CompleteHandler = CompleteHandler;
+        
+        return view.ShowDialog() is null || result is null
+            ? Result.Fail("Operation canceled") 
+            : result;
+
+        void CompleteHandler(Result<TResult> value)
+        {
+            result = value;
+            view.Close();
+            viewModel.CompleteHandler = null;
+        }
     }
 }

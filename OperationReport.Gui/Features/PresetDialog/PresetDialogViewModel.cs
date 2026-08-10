@@ -6,7 +6,13 @@ namespace AetherSystem.OperationReport.Gui.Features.PresetDialog;
 
 public partial class PresetDialogViewModel : DialogViewModel<PresetConfig>
 {
-    private readonly IPresetDialogContent[] _pages;
+    private readonly IReadOnlyList<Type> _pageTypes = [
+        typeof(DefineDataSourceViewModel),
+        typeof(ReferenceMappingViewModel),
+        typeof(OperationMappingViewModel),
+        typeof(SampleMappingViewModel),
+    ];
+    
     private readonly PresetDialogContext _context;
     private int _currentPageIndex;
     
@@ -26,13 +32,7 @@ public partial class PresetDialogViewModel : DialogViewModel<PresetConfig>
     public PresetDialogViewModel()
     {
         _context = new PresetDialogContext();
-        _pages = [
-            new DefineDataSourceViewModel(this, _context),
-            new ReferenceMappingViewModel(this, _context),
-            new OperationMappingViewModel(this, _context),
-        ];
-
-        CurrentContent =  _pages[0];
+        CurrentContent =  CreateContent();
     }
 
     [RelayCommand]
@@ -58,7 +58,7 @@ public partial class PresetDialogViewModel : DialogViewModel<PresetConfig>
             return;
         }
 
-        if (_currentPageIndex >= _pages.Length)
+        if (_currentPageIndex >= _pageTypes.Count)
         {
             var presetConfig = _context.PresetConfigBuilder.Build();
             Complete(presetConfig);
@@ -66,10 +66,14 @@ public partial class PresetDialogViewModel : DialogViewModel<PresetConfig>
         }
 
         PreviousText = _currentPageIndex == 0 ? "Cancel" : "Previous";
-        NextText = _currentPageIndex == _pages.Length - 1 ? "Confirm" : "Next";
+        NextText = _currentPageIndex == _pageTypes.Count - 1 ? "Confirm" : "Next";
 
-        // var next = GetCurrentPage();
-        // next.Restore(_mementoRegistry.CreateProxy(next.GetType()));
-        CurrentContent = _pages[_currentPageIndex];
+        CurrentContent = CreateContent();
+    }
+
+    private IPresetDialogContent CreateContent()
+    {
+        var content = Activator.CreateInstance(_pageTypes[_currentPageIndex], this, _context) as IPresetDialogContent;
+        return content ?? throw new InvalidOperationException("Failed to create instance of IPresetDialogContent");
     }
 }

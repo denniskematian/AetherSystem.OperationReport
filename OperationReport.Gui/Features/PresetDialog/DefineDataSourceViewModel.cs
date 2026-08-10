@@ -30,6 +30,12 @@ public partial class DefineDataSourceViewModel : ObservableObject, IPresetDialog
     {
         var sampleDataSource = Context.SampleDataSource.ToDataSourceInfo();
         await Context.InitializeSampleTablesAsync(sampleDataSource);
+
+        if (SampleIncludesReferenceDataSource)
+        {
+            Context.ReferenceDataSource.FilePath = sampleDataSource.FilePath;
+            Context.ReferenceDataSource.FileType = sampleDataSource.FileType;
+        }
         
         var referenceDataSource = SampleIncludesReferenceDataSource
             ? sampleDataSource

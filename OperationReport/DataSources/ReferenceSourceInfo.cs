@@ -10,10 +10,10 @@ public sealed record ReferenceSourceInfo : DataSourceInfo
     
     public ReferenceSourceInfo(
         string filePath,
-        FileType type,
+        FileType fileType,
         Table table,
         Column idColumn,
-        Column labelColumn) : base(filePath, type)
+        Column labelColumn) : base(filePath, fileType)
     {
         if(table.Columns.All(column => !ColumnComparer.NameAndType.Equals(column, idColumn)))
             throw new ArgumentException("ID column not found in table.");
