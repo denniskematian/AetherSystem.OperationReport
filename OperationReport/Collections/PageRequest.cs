@@ -7,7 +7,7 @@ public record PageRequest
     
     public static PageRequest All => new(1, int.MaxValue);
 
-    public PageRequest(int page, int pageSize = 100)
+    public PageRequest(int page, int pageSize)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(pageSize, 1);
         ArgumentOutOfRangeException.ThrowIfLessThan(page, 1);

@@ -7,7 +7,7 @@ public class PageRequestTest
     [Fact]
     public void Constructor_ThrowsForInvalidPageOrPageSize()
     {
-        Assert.Throws<ArgumentOutOfRangeException>(() => new PageRequest(0));
+        Assert.Throws<ArgumentOutOfRangeException>(() => new PageRequest(0, 100));
         Assert.Throws<ArgumentOutOfRangeException>(() => new PageRequest(1, 0));
         Assert.Throws<ArgumentOutOfRangeException>(() => new PageRequest(-1, -1));
     }
@@ -56,7 +56,7 @@ public class PageRequestTest
     [Fact]
     public void ComputeRange_ThrowsForNegativeTotalCount()
     {
-        var request = new PageRequest(1);
+        var request = new PageRequest(1, 100);
 
         Assert.Throws<ArgumentOutOfRangeException>(() => request.ComputeRange(-1));
     }

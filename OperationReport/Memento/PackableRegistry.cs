@@ -57,7 +57,7 @@ public class PackableRegistry(IPackerProvider provider)
     
     public bool ContainsKey(string key) => _registry.ContainsKey(key);
 
-    public async Task LoadAsync(Stream stream, CancellationToken cancellationToken = default)
+    public async Task LoadAsync(Stream stream, bool clearExisting, CancellationToken cancellationToken = default)
     {
         if(!stream.CanRead)
             throw new ArgumentException("Stream is not readable.");
@@ -65,6 +65,9 @@ public class PackableRegistry(IPackerProvider provider)
         var packableRegistry = await MemoryPackSerializer.DeserializeAsync<Dictionary<string, IPackableRecord>>(stream, cancellationToken: cancellationToken)
                                ?? throw new ArgumentException("Stream is not readable.");
         
+        if(clearExisting)
+            _registry.Clear();
+
         foreach (var (key, value) in packableRegistry)
             _registry[key] = value;
     }

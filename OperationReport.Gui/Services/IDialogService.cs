@@ -1,8 +1,11 @@
 using System.IO;
 using System.Windows;
+using AetherSystem.OperationReport.DataSources;
 using AetherSystem.OperationReport.Gui.Features;
 using AetherSystem.OperationReport.Gui.Features.PresetDialog;
+using AetherSystem.OperationReport.Gui.Features.SeriesFilterDialog;
 using AetherSystem.OperationReport.ValueObjects;
+using AetherSystem.SensorReport.Gui.Features.SeriesFilterDialog;
 using FluentResults;
 using Microsoft.Win32;
 
@@ -15,6 +18,7 @@ public interface IDialogService
     Result ConfirmDialog(string message, string caption = "Confirm", MessageBoxImage icon = MessageBoxImage.None);
     void ErrorDialog(string message, string caption = "Error");
     Result<PresetConfig> OpenPresetDialog();
+    Result<SampleFilterQuery> OpenFilterQueryDialog(SampleFilterQuery? query, bool canEditBatchNumber = true);
 }
 
 internal class DialogService : IDialogService
@@ -60,6 +64,20 @@ internal class DialogService : IDialogService
         var view = new PresetDialogView();
         var viewModel = new PresetDialogViewModel();
         return ShowDialog<PresetDialogViewModel, PresetConfig>(view, viewModel);
+    }
+
+    public Result<SampleFilterQuery> OpenFilterQueryDialog(SampleFilterQuery? query, bool canEditBatchNumber = true)
+    {
+        var view = new SeriesFilterDialogView();
+        var viewModel = new SeriesFilterDialogViewModel
+        {
+            StartDate = query?.From ?? DateTime.Now,
+            EndDate = query?.To ?? DateTime.Now,
+            BatchNumber = query?.BatchNumber,
+            IncludeBatchNumber = query?.BatchNumber is not null,
+            CanEditBatchNumber = canEditBatchNumber
+        };
+        return ShowDialog<SeriesFilterDialogViewModel, SampleFilterQuery>(view, viewModel);
     }
 
     private Result<TResult> ShowDialog<TViewModel, TResult>(Window view, TViewModel viewModel) where TViewModel : DialogViewModel<TResult>

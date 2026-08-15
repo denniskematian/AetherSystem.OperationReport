@@ -24,12 +24,9 @@
     <DataTemplate DataType="{x:Type local:LoadingViewModel}">
       <local:LoadingView />
     </DataTemplate>
-    <!-- <DataTemplate DataType="{x:Type local:DashboardViewModel}"> -->
-    <!--   <local:DashboardView /> -->
-    <!-- </DataTemplate> -->
-    <!-- <DataTemplate DataType="{x:Type local:ChartPreviewViewModel}"> -->
-    <!--   <local:ChartPreviewView /> -->
-    <!-- </DataTemplate> -->
+    <DataTemplate DataType="{x:Type local:DashboardViewModel}">
+      <local:DashboardView />
+    </DataTemplate>
   </mah:MetroWindow.Resources>
 
   <mah:MetroWindow.IconTemplate>
@@ -62,7 +59,7 @@
             <TextBlock Text="Open" Margin="3 0" />
           </StackPanel>
         </Button>
-        <Button Command="{Binding SavePresetCommand}" Padding="5 2">
+        <Button  Command="{Binding SavePresetCommand}" Padding="5 2">
           <StackPanel Orientation="Horizontal">
             <i:Material Kind="ContentSave" />
             <TextBlock Text="Save" Margin="3 0" />
@@ -76,7 +73,7 @@
     <StatusBar Grid.Row="2" 
                BorderThickness="0 1 0 0"
                BorderBrush="{StaticResource MahApps.Brushes.Gray2}"
-               Padding="5 3"
+               Padding="5 0"
                Background="{StaticResource MahApps.Brushes.Gray1}"
                Visibility="Collapsed">
       <StackPanel Orientation="Horizontal">

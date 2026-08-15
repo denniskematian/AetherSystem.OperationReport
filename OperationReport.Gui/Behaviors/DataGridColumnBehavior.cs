@@ -59,18 +59,19 @@ public static class DataGridColumnsBehavior
             var gridColumn = new DataGridTextColumn
             {
                 Header = column.Name,
-                Binding = binding
+                Binding = binding,
             };
 
+            var style = new Style(typeof(TextBlock));
             if (column is { Type: ColumnType.Integer or ColumnType.Real } and not TimestampColumn)
             {
-                var style = new Style(typeof(TextBlock));
-
                 var alignment = new Setter(TextBlock.TextAlignmentProperty, TextAlignment.Right);
                 style.Setters.Add(alignment);
-
-                gridColumn.ElementStyle = style;
             }
+            
+            var padding = new Setter(TextBlock.PaddingProperty, new Thickness(3, 2, 3, 2));
+            style.Setters.Add(padding);
+            gridColumn.ElementStyle = style;
 
             dataGrid.Columns.Add(gridColumn);
         }

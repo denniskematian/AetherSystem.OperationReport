@@ -4,12 +4,14 @@ public sealed class PackerProvider(IReadOnlyList<IPacker> packers) : IPackerProv
 {
     private IPacker GetPacker(Type sourceType)
     {
-        return packers.First(p => p.SourceType == sourceType);
+        return packers.FirstOrDefault(p => p.SourceType == sourceType)
+            ?? throw new InvalidOperationException($"No packer found for type {sourceType}");
     }
 
     private IPacker GetUnpacker(Type targetType)
     {
-        return packers.First(p => p.TargetType == targetType);
+        return packers.FirstOrDefault(p => p.TargetType == targetType)
+            ?? throw new InvalidOperationException($"No unpacker found for type {targetType}");
     }
 
     public IPackableRecord Pack(object value)

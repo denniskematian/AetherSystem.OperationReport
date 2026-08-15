@@ -1,0 +1,66 @@
+<mah:MetroWindow x:Class="AetherSystem.SensorReport.Gui.Features.SeriesFilterDialog.SeriesFilterDialogView"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                 xmlns:local="clr-namespace:AetherSystem.SensorReport.Gui.Features.SeriesFilterDialog"
+                 xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+                 xmlns:g="clr-namespace:System.Globalization;assembly=System.Runtime"
+                 xmlns:seriesFilterDialog="clr-namespace:AetherSystem.OperationReport.Gui.Features.SeriesFilterDialog"
+                 mc:Ignorable="d"
+                 d:DataContext="{d:DesignInstance seriesFilterDialog:SeriesFilterDialogViewModel}"
+                 d:DesignHeight="300" d:DesignWidth="300"
+                 WindowStartupLocation="CenterOwner"
+                 ResizeMode="CanResize"
+                 Title="Filter Sample Data" Height="400" Width="480"
+                 BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
+                 BorderThickness="1">
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <Grid Grid.Row="0" Margin="10 8">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+      </Grid.RowDefinitions>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
+      <Label Grid.Row="0" Grid.Column="0" Content="Date" />
+      <mah:DateTimePicker Grid.Row="0" Grid.Column="1" Margin="8 0 0 0"
+                          Culture="{x:Static g:CultureInfo.InvariantCulture}"
+                          SelectedDateFormat="Short"
+                          SelectedTimeFormat="Long"
+                          SelectedDateTime="{Binding StartDate}" />
+      <TextBlock Grid.Row="0" Grid.Column="2" Text="to" Margin="8 0" VerticalAlignment="Center" />
+      <mah:DateTimePicker Grid.Row="0" Grid.Column="3" Margin="0 0 8 0"
+                          Culture="{x:Static g:CultureInfo.InvariantCulture}"
+                          SelectedDateFormat="Short"
+                          SelectedTimeFormat="Long"
+                          SelectedDateTime="{Binding EndDate}" />
+      <CheckBox Grid.Row="1" Grid.Column="0" Margin="8 5" Content="Batch Number"
+                IsChecked="{Binding IncludeBatchNumber}"
+                IsEnabled="{Binding CanEditBatchNumber}" />
+      <TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Margin="8 5"
+               Text="{Binding BatchNumber}"
+               IsEnabled="{Binding CanEditBatchNumber}" />
+    </Grid>
+    <Separator Grid.Row="1" />
+    <StackPanel Grid.Row="2" 
+                Orientation="Horizontal" 
+                Margin="10 8"
+                HorizontalAlignment="Right">
+      <Button Content="Cancel" IsCancel="True" Margin="5 0 0 0" />
+      <Button Content="OK" IsDefault="True" Margin="5 0 0 0"
+              Style="{DynamicResource MahApps.Styles.Button.Flat.Accent}"
+              Command="{Binding ConfirmCommand}" />
+    </StackPanel>
+  </Grid>
+</mah:MetroWindow>

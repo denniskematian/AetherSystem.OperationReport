@@ -1,6 +1,7 @@
 using AetherSystem.OperationReport.DataSources;
 using AetherSystem.OperationReport.Gui.Services;
 using AetherSystem.OperationReport.Memento;
+using AetherSystem.OperationReport.Packers;
 
 namespace AetherSystem.OperationReport.Gui;
 
@@ -20,6 +21,14 @@ public static class Facades
     private static IPackerProvider BuildPackerProvider()
     {
         var builder = new PackableRegistryBuilder();
+        builder.Add(new PresetConfigPacker());
+        builder.Add(new ColumnPacker());
+        builder.Add(new TimestampColumnPacker());
+        builder.Add(new TablePacker());
+        builder.Add(new DataSourceInfoPacker());
+        builder.Add(new SampleReferenceConfigPacker());
+        builder.Add(new SampleSourceInfoPacker());
+        builder.Add(new OperationSourceInfoPacker());
         
         return builder.Build();
     }
