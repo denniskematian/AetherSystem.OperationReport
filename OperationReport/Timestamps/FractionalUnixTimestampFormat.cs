@@ -1,13 +1,7 @@
 namespace AetherSystem.OperationReport.Timestamps;
 
-public sealed record FractionalUnixTimestampFormat : ITimestampFormat
+public sealed record FractionalUnixTimestampFormat(TimestampResolution Resolution, TimeSpan Offset = default) : ITimestampFormat
 {
-    public ITimestampComparer Comparer { get; } 
-    public ITimestampConverter Converter { get; }
-
-    public FractionalUnixTimestampFormat(TimestampResolution resolution, TimeSpan offset = default)
-    {
-        Comparer = new TimestampComparer(TimestampResolution.Microsecond);
-        Converter = new FractionalUnixTimestampConverter(resolution, offset);
-    }
+    public ITimestampComparer Comparer { get; } = new TimestampComparer(TimestampResolution.Microsecond);
+    public ITimestampConverter Converter { get; } = new FractionalUnixTimestampConverter(Resolution, Offset);
 }

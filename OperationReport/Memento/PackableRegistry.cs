@@ -3,7 +3,7 @@ using MemoryPack;
 
 namespace AetherSystem.OperationReport.Memento;
 
-public class PackableRegistry(IReadOnlyList<IPacker> packers)
+public class PackableRegistry(IPackerProvider provider)
 {
     private readonly ConcurrentDictionary<string, IPackableRecord> _registry = [];
 
@@ -11,18 +11,16 @@ public class PackableRegistry(IReadOnlyList<IPacker> packers)
     
     public void Put<T>(string key, T value) where T : notnull
     {
-        var packer = GetPacker(typeof(T));
-        _registry[key] = packer.Pack(value);
+        _registry[key] = provider.Pack(value);
         IsDirty = true;
     }
     
     public void PutCollection<T>(string key, IEnumerable<T> items) where T : notnull
     {
-        var packer = GetPacker(typeof(T));
         var collection = new CollectionPack([
-            ..items.Select(item => packer.Pack(item))
+            ..items.Select(item => provider.Pack(item))
         ]);
-        _registry[key] = packer.Pack(collection);
+        _registry[key] = provider.Pack(collection);
         IsDirty = true;
     }
 
@@ -41,12 +39,9 @@ public class PackableRegistry(IReadOnlyList<IPacker> packers)
     public T? Get<T>(string key) where T : notnull
     {
         if (!_registry.TryGetValue(key, out var record))
-        {
             return default;
-        }
 
-        var packer = GetPacker(typeof(T));
-        return (T)packer.Unpack(record);
+        return (T)provider.Unpack(record);
     }
     
     public IEnumerable<T> GetCollection<T>(string key) where T : notnull
@@ -57,8 +52,7 @@ public class PackableRegistry(IReadOnlyList<IPacker> packers)
         if(record is not CollectionPack collection)
             throw new InvalidOperationException($"The record with key '{key}' is not a collection.");
 
-        var packer = GetPacker(typeof(T));
-        return collection.Items.Select(item => (T)packer.Unpack(item));
+        return collection.Items.Select(item => (T)provider.Unpack(item));
     }
     
     public bool ContainsKey(string key) => _registry.ContainsKey(key);
@@ -82,10 +76,5 @@ public class PackableRegistry(IReadOnlyList<IPacker> packers)
 
         await MemoryPackSerializer.SerializeAsync(stream, _registry, cancellationToken: cancellationToken);
         IsDirty = false;
-    }
-
-    private IPacker GetPacker(Type sourceType)
-    {
-        return packers.First(i => i.SourceType == sourceType);
     }
 }

@@ -19,7 +19,7 @@ public sealed class PackableRegistryBuilder
         _packers.Add(packer);
     }
 
-    public PackableRegistry Build()
+    public IPackerProvider Build()
     {
         List<(ushort, Type)> packableTypes = [
             (0, typeof(CollectionPack)),
@@ -31,7 +31,7 @@ public sealed class PackableRegistryBuilder
         ]);
 
         MemoryPackFormatterProvider.Register(registry);
-        return new PackableRegistry(_packers.AsReadOnly());
+        return new PackerProvider(_packers);
     }
 
     private void CheckSourceType(Type type)

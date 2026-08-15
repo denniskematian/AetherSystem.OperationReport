@@ -12,10 +12,12 @@ public static class Facades
     public static IDialogService DialogService => 
         LazyInitializer.EnsureInitialized(ref field, () => new DialogService());
     
-    public static PackableRegistry MementoRegistry => 
-        LazyInitializer.EnsureInitialized(ref field, CreateMementoRegistry);
+    public static PackableRegistry CreateMementoRegistry() => new(PackerProvider);
+    
+    private static IPackerProvider PackerProvider => 
+        LazyInitializer.EnsureInitialized(ref field, BuildPackerProvider);
 
-    private static PackableRegistry CreateMementoRegistry()
+    private static IPackerProvider BuildPackerProvider()
     {
         var builder = new PackableRegistryBuilder();
         
