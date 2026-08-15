@@ -1,30 +1,33 @@
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Windows;
+using AetherSystem.OperationReport.Charting;
 using AetherSystem.OperationReport.Collections;
 using AetherSystem.OperationReport.DataSources;
 using AetherSystem.OperationReport.DataSources.Sqlite;
-using AetherSystem.OperationReport.Gui.Options;
 using AetherSystem.OperationReport.ValueObjects;
 using CommunityToolkit.Mvvm.ComponentModel;
+using ScottPlot;
 
 namespace AetherSystem.OperationReport.Gui.Features.Main;
 
 public partial class DashboardContext : ObservableObject
 {
     public DataCollector DataCollector { get; }
-    public PresetConfig PresetConfig { get; set; }
+    public PresetConfig PresetConfig { get; }
+    public ChartConfig ChartConfig { get; private set; }
+    public ChartController? ChartController { get; private set; }
     
     [ObservableProperty]
     public partial SampleFilterQuery? FilterQuery { get; set; }
 
     public ObservableCollection<SampleFilterQuery> FilterQueries { get; } = [];
     
-    public event EventHandler<SampleFilterQuery>? FilterQueryChanged;
+    public event EventHandler? DataCollectorUpdated;
     
-    public DashboardContext(PresetConfig presetConfig)
+    public DashboardContext(PresetConfig presetConfig, ChartConfig chartConfig)
     {
         PresetConfig = presetConfig;
+        ChartConfig = chartConfig;
         
         var sampleDataAdapter = Facades.DataSourceFactory.CreateSampleTableAdapter(presetConfig.SampleDataSource);
         var operationDataAdapter = Facades.DataSourceFactory.CreateOperationTableAdapter(presetConfig.OperationDataSource);
@@ -76,7 +79,22 @@ public partial class DashboardContext : ObservableObject
         Application.Current.Dispatcher.InvokeAsync(async () =>
         {
             await DataCollector.UpdateDataAsync(value);
-            FilterQueryChanged?.Invoke(this, value);
+            DataCollectorUpdated?.Invoke(this, EventArgs.Empty);
         });
+    }
+
+    public void InitializeChart(Plot plot)
+    {
+        ChartController = new ChartController(plot, DataCollector);
+        ChartController.UpdateConfiguration(ChartConfig);
+    }
+    
+    public void UpdateChartConfig(ChartConfig chartConfig)
+    {
+        if(ChartController is null)
+            return;
+
+        ChartConfig = chartConfig;
+        ChartController.UpdateConfiguration(ChartConfig);
     }
 }

@@ -1,4 +1,5 @@
 using System.IO;
+using AetherSystem.OperationReport.Charting;
 using AetherSystem.OperationReport.Gui.Services;
 using AetherSystem.OperationReport.Memento;
 using AetherSystem.OperationReport.ValueObjects;
@@ -30,7 +31,9 @@ public partial class MainViewModel : ObservableObject
             return;
         
         _registry.Put(nameof(PresetConfig), result.Value);
-        await InitializeDashboard(result.Value, "New Preset");
+        
+        var chartConfig = ChartConfig.CreateDefault(result.Value.SampleReferences);
+        await InitializeDashboard(result.Value, chartConfig, "New Preset");
     }
 
     [RelayCommand]
@@ -48,8 +51,10 @@ public partial class MainViewModel : ObservableObject
         
         var presetConfig = _registry.Get<PresetConfig>(nameof(PresetConfig))
             ?? throw new InvalidOperationException("Preset config not found");
+
+        var chartConfig = ChartConfig.CreateDefault(presetConfig.SampleReferences);
         
-        await InitializeDashboard(presetConfig, result.Value.Name);
+        await InitializeDashboard(presetConfig, chartConfig, result.Value.Name);
     }
 
     [RelayCommand(CanExecute = nameof(CanSavePreset))]
@@ -78,12 +83,12 @@ public partial class MainViewModel : ObservableObject
         return _registry.ContainsKey(nameof(PresetConfig));
     }
 
-    private async Task InitializeDashboard(PresetConfig presetConfig, string name)
+    private async Task InitializeDashboard(PresetConfig presetConfig, ChartConfig chartConfig, string name)
     {
         SavePresetCommand.NotifyCanExecuteChanged();
         TitleText = Title + " - " + name;
 
-        var dashboardContext = new DashboardContext(presetConfig);
+        var dashboardContext = new DashboardContext(presetConfig, chartConfig);
         CurrentContent = new DashboardViewModel(dashboardContext);
 
         await dashboardContext.DiscoverFilterQueries();

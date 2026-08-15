@@ -12,6 +12,7 @@
                  d:DesignHeight="300" d:DesignWidth="300"
                  WindowStartupLocation="CenterOwner"
                  ResizeMode="CanResize"
+                 CornerPreference="DoNotRound"
                  Title="Filter Sample Data" Height="400" Width="480"
                  BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
                  BorderThickness="1">

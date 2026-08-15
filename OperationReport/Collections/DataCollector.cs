@@ -14,6 +14,9 @@ public sealed class DataCollector
     private readonly List<string> _operationComments = [];
     
     private readonly SemaphoreSlim _lock = new(1, 1);
+    
+    public IReadOnlyList<double> SampleTimestamps => _sampleArrayPool.GetSegmentReference(0);
+    public IReadOnlyList<double> OperationTimestamps => _operationArrayPool.GetSegmentReference(0);
 
     public DataCollector(
         ISampleTableAdapter sampleTableAdapter,

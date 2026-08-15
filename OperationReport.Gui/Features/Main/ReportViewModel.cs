@@ -9,4 +9,8 @@ public class ReportViewModel : DashboardContent
         Title = "Batch Document";
         Icon = new PackIconMaterial { Kind = PackIconMaterialKind.FilePdfBox };
     }
+
+    protected override void DataCollectorUpdated()
+    {
+    }
 }

@@ -1,5 +1,3 @@
-using System.ComponentModel;
-using System.Windows;
 using AetherSystem.OperationReport.DataSources;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -7,10 +5,17 @@ using MahApps.Metro.IconPacks;
 
 namespace AetherSystem.OperationReport.Gui.Features.Main;
 
-public abstract partial class DashboardContent(DashboardContext context) : ObservableObject
+public abstract partial class DashboardContent : ObservableObject
 {
     private SampleFilterQuery? _filterQuery;
-    public DashboardContext Context { get; } = context;
+
+    protected DashboardContent(DashboardContext context)
+    {
+        Context = context;
+        context.DataCollectorUpdated += (_, _) => DataCollectorUpdated();
+    }
+
+    public DashboardContext Context { get; }
 
     public string Title { get; protected init; } = string.Empty;
 
@@ -21,7 +26,7 @@ public abstract partial class DashboardContent(DashboardContext context) : Obser
     {
         var filter = Facades.DialogService.OpenFilterQueryDialog(
             Context.FilterQuery,
-            canEditBatchNumber: Context.PresetConfig.SampleDataSource.BatchNumberColumn is not null);
+            canEditBatchNumber: Context.PresetConfig.SampleDataSource.HasBatchNumberColumn);
 
         if (!filter.IsSuccess)
             return;
@@ -30,11 +35,9 @@ public abstract partial class DashboardContent(DashboardContext context) : Obser
             return;
 
         await Context.ApplyFilterAsync(filter.Value);
-        ChangeFilter(filter.Value);
+        DataCollectorUpdated();
         _filterQuery = filter.Value;
     }
 
-    protected virtual void ChangeFilter(SampleFilterQuery filterQuery)
-    {
-    }
+    protected abstract void DataCollectorUpdated();
 }

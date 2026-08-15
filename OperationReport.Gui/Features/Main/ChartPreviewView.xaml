@@ -1,0 +1,51 @@
+<UserControl x:Class="AetherSystem.OperationReport.Gui.Features.Main.ChartPreviewView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:AetherSystem.OperationReport.Gui.Features.Main"
+             xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:scottplot="http://schemas.scottplot.net/2008/xaml/presentation"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance local:ChartPreviewViewModel}"
+             d:DesignHeight="600" d:DesignWidth="800">
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+    <DockPanel Grid.Row="0" Margin="10 8">
+      <StackPanel DockPanel.Dock="Left"
+                  Orientation="Horizontal"
+                  HorizontalAlignment="Left">
+        <mah:SplitButton ItemsSource="{Binding Context.FilterQueries}"
+                         SelectedItem="{Binding Context.FilterQuery}"
+                         Command="{Binding ChangeFilterCommand}">
+          <mah:SplitButton.Icon>
+            <iconPacks:PackIconMaterial Margin="6" Kind="Filter" />
+          </mah:SplitButton.Icon>
+        </mah:SplitButton>
+      </StackPanel>
+      <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+        <Button Style="{DynamicResource MahApps.Styles.Button.Flat}"
+                Command="{Binding ChangeChartConfigCommand}"
+                Margin="0 0 3 0">
+          <Button.Content>
+            <StackPanel Orientation="Horizontal">
+              <iconPacks:PackIconMaterial Margin="6 3" Kind="Cog" VerticalAlignment="Center" />
+              <TextBlock Text="Setting" VerticalAlignment="Center" />
+            </StackPanel>
+          </Button.Content>
+        </Button>
+      </StackPanel>
+      <UserControl/>
+    </DockPanel>
+    <Border Grid.Row="1"
+            BorderThickness="1"
+            Margin="10 0 10 8"
+            BorderBrush="{DynamicResource MahApps.Brushes.Accent2}">
+      <scottplot:WpfPlot x:Name="WpfScottPlot" Padding="10" />
+    </Border>
+  </Grid>
+</UserControl>

@@ -1,5 +1,4 @@
 using AetherSystem.OperationReport.Collections;
-using AetherSystem.OperationReport.DataSources;
 using AetherSystem.OperationReport.Entities;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -29,7 +28,6 @@ public partial class SampleDataViewModel : DashboardContent
     {
         Title = "Sample Data";
         Icon = new PackIconMaterial { Kind = PackIconMaterialKind.Table };
-        context.FilterQueryChanged += (_, filter) => ChangeFilter(filter);
     }
 
     [RelayCommand(CanExecute = nameof(CanNextPage))]
@@ -65,7 +63,7 @@ public partial class SampleDataViewModel : DashboardContent
         TotalRows = pageResult.TotalCount;
     }
 
-    protected override void ChangeFilter(SampleFilterQuery filterQuery)
+    protected override void DataCollectorUpdated()
     {
         ChangePage(1);
     }
