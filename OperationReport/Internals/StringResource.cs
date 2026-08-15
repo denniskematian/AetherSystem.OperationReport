@@ -1,5 +1,3 @@
-using System.Runtime.CompilerServices;
-
 namespace AetherSystem.OperationReport.Internals;
 
 internal static class StringResource

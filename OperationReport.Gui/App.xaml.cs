@@ -1,7 +1,4 @@
-﻿using System.Windows;
-using AetherSystem.OperationReport.DataSources;
-using Microsoft.Extensions.DependencyInjection;
-using QuestPDF.Infrastructure;
+﻿using QuestPDF.Infrastructure;
 
 namespace AetherSystem.OperationReport.Gui;
 

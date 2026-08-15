@@ -9,4 +9,13 @@ public static class Options
         new(TimestampResolution.Second),
         new(TimestampResolution.Millisecond),
     ];
+
+    public static IReadOnlyList<Option<T?>> WithNone<T>(IEnumerable<T> values, Func<T, string> nameFactory)
+        where T : class
+    {
+        return Enumerable.Concat(
+            [new Option<T?>("(None)", null)], 
+            values.Select(i => new Option<T?>(nameFactory.Invoke(i), i))
+        ).ToArray();
+    }
 }

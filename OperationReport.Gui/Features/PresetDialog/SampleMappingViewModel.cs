@@ -19,7 +19,7 @@ public sealed partial class SampleMappingViewModel : ObservableObject, IPresetDi
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(SampleRealColumns))]
-    [NotifyPropertyChangedFor(nameof(SampleIntegerColumns))]
+    [NotifyPropertyChangedFor(nameof(BatchNumberColumnOptions))]
     public partial Table? SampleTable { get; set; }
 
     [ObservableProperty]
@@ -36,21 +36,11 @@ public sealed partial class SampleMappingViewModel : ObservableObject, IPresetDi
     [ObservableProperty] 
     public partial IReadOnlyList<SampleReferenceConfig> SampleReferences { get; private set; } = [];
     
-    public IReadOnlyList<Column> SampleIntegerColumns
+    private IReadOnlyList<Column> SampleIntegerColumns
         => SampleTable?.Columns.Where(i => i.Type == ColumnType.Integer).ToArray() ?? [];
 
-    public IReadOnlyList<Option<Column?>> BatchNumberColumnOptions
-    {
-        get
-        {
-            return Enumerable.Concat(
-                [new Option<Column?>("(None)", null)], 
-                SampleTable?.Columns
-                    .Where(i => i.Type == ColumnType.Integer)
-                    .Select(i => new Option<Column?>(i.Name, i))?? []
-                ).ToArray();
-        }
-    }
+    public IReadOnlyList<Option<Column?>> BatchNumberColumnOptions 
+        => Options.WithNone(SampleIntegerColumns, i => i.Name);
 
     public IReadOnlyList<Column> SampleRealColumns
         => SampleTable?.Columns.Where(i => i.Type == ColumnType.Real).ToArray() ?? [];
