@@ -13,9 +13,9 @@ public sealed partial class ChartConfigPacker : Packer<ChartConfig, ChartConfigP
         IReadOnlyList<SeriesConfigPacker.Record> Series,
         MarkerConfigPacker.Record OperationMarker,
         bool ShowDateInBottomTicks,
-        AxisRangePacker.Record? LeftAxisRange,
-        AxisRangePacker.Record? RightAxisRange,
-        AxisRangePacker.Record? BottomAxisRange) : IPackableRecord;
+        AxisLimitPacker.Record? LeftAxisLimit,
+        AxisLimitPacker.Record? RightAxisLimit,
+        AxisLimitPacker.Record? BottomAxisLimit) : IPackableRecord;
 
     public override Record Pack(ChartConfig unpacked, IPackerProvider provider)
     {
@@ -25,9 +25,9 @@ public sealed partial class ChartConfigPacker : Packer<ChartConfig, ChartConfigP
             unpacked.Series.Select(s => (SeriesConfigPacker.Record)provider.Pack(s)).ToArray(),
             (MarkerConfigPacker.Record)provider.Pack(unpacked.OperationMarker),
             unpacked.ShowDateInBottomTicks,
-            unpacked.LeftAxisRange is null ? null : (AxisRangePacker.Record)provider.Pack(unpacked.LeftAxisRange),
-            unpacked.RightAxisRange is null ? null : (AxisRangePacker.Record)provider.Pack(unpacked.RightAxisRange),
-            unpacked.BottomAxisRange is null ? null : (AxisRangePacker.Record)provider.Pack(unpacked.BottomAxisRange));
+            unpacked.LeftAxisLimit is null ? null : (AxisLimitPacker.Record)provider.Pack(unpacked.LeftAxisLimit),
+            unpacked.RightAxisLimit is null ? null : (AxisLimitPacker.Record)provider.Pack(unpacked.RightAxisLimit),
+            unpacked.BottomAxisLimit is null ? null : (AxisLimitPacker.Record)provider.Pack(unpacked.BottomAxisLimit));
     }
 
     public override ChartConfig Unpack(Record packed, IPackerProvider provider)
@@ -39,9 +39,9 @@ public sealed partial class ChartConfigPacker : Packer<ChartConfig, ChartConfigP
             Series = packed.Series.Select(s => (SeriesConfig)provider.Unpack(s)).ToArray(),
             OperationMarker = (MarkerConfig)provider.Unpack(packed.OperationMarker),
             ShowDateInBottomTicks = packed.ShowDateInBottomTicks,
-            LeftAxisRange = packed.LeftAxisRange is null ? null : (AxisRange)provider.Unpack(packed.LeftAxisRange),
-            RightAxisRange = packed.RightAxisRange is null ? null : (AxisRange)provider.Unpack(packed.RightAxisRange),
-            BottomAxisRange = packed.BottomAxisRange is null ? null : (AxisRange)provider.Unpack(packed.BottomAxisRange),
+            LeftAxisLimit = packed.LeftAxisLimit is null ? null : (AxisLimit)provider.Unpack(packed.LeftAxisLimit),
+            RightAxisLimit = packed.RightAxisLimit is null ? null : (AxisLimit)provider.Unpack(packed.RightAxisLimit),
+            BottomAxisLimit = packed.BottomAxisLimit is null ? null : (AxisLimit)provider.Unpack(packed.BottomAxisLimit),
         };
     }
 }

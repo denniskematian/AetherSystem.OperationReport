@@ -36,13 +36,13 @@
       </Grid.ColumnDefinitions>
       <Label Grid.Row="0" Grid.Column="0" Content="Date" />
       <mah:DateTimePicker Grid.Row="0" Grid.Column="1" Margin="8 0 0 0"
-                          Culture="{x:Static g:CultureInfo.InvariantCulture}"
+                          Culture="{x:Static g:CultureInfo.CurrentCulture}"
                           SelectedDateFormat="Short"
                           SelectedTimeFormat="Long"
                           SelectedDateTime="{Binding StartDate}" />
       <TextBlock Grid.Row="0" Grid.Column="2" Text="to" Margin="8 0" VerticalAlignment="Center" />
       <mah:DateTimePicker Grid.Row="0" Grid.Column="3" Margin="0 0 8 0"
-                          Culture="{x:Static g:CultureInfo.InvariantCulture}"
+                          Culture="{x:Static g:CultureInfo.CurrentCulture}"
                           SelectedDateFormat="Short"
                           SelectedTimeFormat="Long"
                           SelectedDateTime="{Binding EndDate}" />

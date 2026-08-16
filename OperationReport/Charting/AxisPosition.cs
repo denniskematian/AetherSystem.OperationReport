@@ -4,4 +4,5 @@ public enum AxisPosition
 {
     Left,
     Right,
+    Bottom,
 }

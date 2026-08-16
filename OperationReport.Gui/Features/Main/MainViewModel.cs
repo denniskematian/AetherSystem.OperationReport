@@ -1,5 +1,6 @@
 using System.IO;
 using AetherSystem.OperationReport.Charting;
+using AetherSystem.OperationReport.DataSources;
 using AetherSystem.OperationReport.Gui.Services;
 using AetherSystem.OperationReport.Memento;
 using AetherSystem.OperationReport.ValueObjects;
@@ -91,6 +92,9 @@ public partial class MainViewModel : ObservableObject
 
         var dashboardContext = new DashboardContext(presetConfig, chartConfig, _registry);
         CurrentContent = new DashboardViewModel(dashboardContext);
+        var filterQuery = _registry.Get<SampleFilterQuery>(nameof(SampleFilterQuery));
+        if(filterQuery is not null)
+            await dashboardContext.ApplyFilterAsync(filterQuery);
 
         await dashboardContext.DiscoverFilterQueries();
     }

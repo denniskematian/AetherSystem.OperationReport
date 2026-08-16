@@ -11,9 +11,9 @@ public sealed class ChartConfig
     public required MarkerConfig OperationMarker { get; init; }
     public required bool ShowDateInBottomTicks { get; init; }
 
-    public AxisRange? LeftAxisRange { get; set; }
-    public AxisRange? RightAxisRange { get; set; }
-    public AxisRange? BottomAxisRange { get; set; }
+    public AxisLimit? LeftAxisLimit { get; set; }
+    public AxisLimit? RightAxisLimit { get; set; }
+    public AxisLimit? BottomAxisLimit { get; set; }
 
     public static ChartConfig CreateDefault(IReadOnlyList<SampleReferenceConfig> references)
     {

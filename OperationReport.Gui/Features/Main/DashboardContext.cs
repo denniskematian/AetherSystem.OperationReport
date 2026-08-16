@@ -35,8 +35,20 @@ public partial class DashboardContext : ObservableObject
         var sampleDataAdapter = Facades.DataSourceFactory.CreateSampleTableAdapter(presetConfig.SampleDataSource);
         var operationDataAdapter = Facades.DataSourceFactory.CreateOperationTableAdapter(presetConfig.OperationDataSource);
         DataCollector = new DataCollector(sampleDataAdapter, operationDataAdapter);
+        registry.PreSaveEvent += RegistryPreSaveEvent;
     }
-    
+
+    private void RegistryPreSaveEvent(object? sender, EventArgs e)
+    {
+        if (ChartController is null)
+            return;
+        
+        ChartConfig.BottomAxisLimit = ChartController.GetAxisLimit(AxisPosition.Bottom);
+        ChartConfig.LeftAxisLimit = ChartController.GetAxisLimit(AxisPosition.Left);
+        ChartConfig.RightAxisLimit = ChartController.GetAxisLimit(AxisPosition.Right);
+        Registry.Put(nameof(ChartConfig), ChartConfig);
+    }
+
     public async Task DiscoverFilterQueries()
     {
         if(PresetConfig.SampleDataSource.FileType is not FileType.Sqlite)
@@ -57,7 +69,8 @@ public partial class DashboardContext : ObservableObject
             Application.Current.Dispatcher.Invoke(() =>
             {
                 foreach (var query in filterQueries)
-                    FilterQueries.Add(query);
+                    if(!FilterQueries.Contains(query))
+                        FilterQueries.Add(query);
             });
         });
     }
@@ -72,6 +85,7 @@ public partial class DashboardContext : ObservableObject
         FilterQuery = query;
 
         await DataCollector.UpdateDataAsync(query);
+        Registry.Put(nameof(SampleFilterQuery), query);
     }
 
     partial void OnFilterQueryChanged(SampleFilterQuery? value)
@@ -84,6 +98,7 @@ public partial class DashboardContext : ObservableObject
             await DataCollector.UpdateDataAsync(value);
             DataCollectorUpdated?.Invoke(this, EventArgs.Empty);
         });
+        Registry.Put(nameof(SampleFilterQuery), value);
     }
 
     public void InitializeChart(Plot plot)
@@ -99,5 +114,6 @@ public partial class DashboardContext : ObservableObject
 
         ChartConfig = chartConfig;
         ChartController.UpdateConfiguration(ChartConfig);
+        Registry.Put(nameof(ChartConfig), chartConfig);
     }
 }

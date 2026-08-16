@@ -1,5 +1,6 @@
 using System.Globalization;
 using AetherSystem.OperationReport.Collections;
+using AetherSystem.OperationReport.Internals;
 using ScottPlot;
 using ScottPlot.DataSources;
 using ScottPlot.Plottables;
@@ -59,9 +60,9 @@ public sealed class ChartController
         ConfigureYAxis(_plot.Axes.Left, config.LeftAxis);
         ConfigureYAxis(_plot.Axes.Right, config.RightAxis);
         
-        ConfigureAxisRange(_plot.Axes.Left, config.LeftAxisRange);
-        ConfigureAxisRange(_plot.Axes.Right, config.RightAxisRange);
-        ConfigureAxisRange(_plot.Axes.Bottom, config.BottomAxisRange);
+        ConfigureAxisLimit(_plot.Axes.Left, config.LeftAxisLimit);
+        ConfigureAxisLimit(_plot.Axes.Right, config.RightAxisLimit);
+        ConfigureAxisLimit(_plot.Axes.Bottom, config.BottomAxisLimit);
         
         var comparer = SeriesConfigColumnComparer.Instance;
         var added = config.Series.Except(_seriesConfigs, comparer);
@@ -178,6 +179,23 @@ public sealed class ChartController
         return true;
     }
 
+    public AxisLimit GetAxisLimit(AxisPosition position)
+    {
+        var axis = position switch
+        {
+            AxisPosition.Left => _plot.Axes.Left,
+            AxisPosition.Right => _plot.Axes.Right,
+            AxisPosition.Bottom => _plot.Axes.Bottom,
+            _ => ExceptionUtils.ThrowInvalidEnumArgument<IAxis>(position)
+        };
+        
+        return new AxisLimit
+        {
+            Min = axis.Min,
+            Max = axis.Max
+        };
+    }
+
     private CoordinateRect GetInteractiveRectangleBounds(double margin)
     {
         var limits = _plot.Axes.GetLimits();
@@ -246,13 +264,13 @@ public sealed class ChartController
         yAxis.FrameLineStyle.IsVisible = false;
     }
 
-    private static void ConfigureAxisRange(IAxis axis, AxisRange? range)
+    private static void ConfigureAxisLimit(IAxis axis, AxisLimit? limit)
     {
-        if (range is null)
+        if (limit is null)
             return;
 
-        axis.Min = range.Min;
-        axis.Max = range.Max;
+        axis.Min = limit.Min;
+        axis.Max = limit.Max;
     }
 
     private class SeriesConfigColumnComparer : IEqualityComparer<SeriesConfig>

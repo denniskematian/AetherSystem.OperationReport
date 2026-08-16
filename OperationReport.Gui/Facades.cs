@@ -20,7 +20,7 @@ public static class Facades
 
     private static IPackerProvider BuildPackerProvider()
     {
-        var builder = new PackableRegistryBuilder()
+        return new PackableRegistryBuilder()
             .Add<PresetConfigPacker>()
             .Add<ColumnPacker>()
             .Add<TimestampColumnPacker>()
@@ -30,13 +30,13 @@ public static class Facades
             .Add<SampleSourceInfoPacker>()
             .Add<OperationSourceInfoPacker>()
             .Add<AxisConfigPacker>()
-            .Add<AxisRangePacker>()
+            .Add<AxisLimitPacker>()
             .Add<ChartConfigPacker>()
             .Add<ColorInfoPacker>()
             .Add<LinePatternPacker>()
             .Add<MarkerConfigPacker>()
-            .Add<SeriesConfigPacker>();
-        
-        return builder.Build();
+            .Add<SeriesConfigPacker>()
+            .Add<SampleFilterQueryPacker>()
+            .Build();
     }
 }
