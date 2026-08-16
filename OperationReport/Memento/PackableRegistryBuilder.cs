@@ -9,7 +9,7 @@ public sealed class PackableRegistryBuilder
     private readonly HashSet<Type> _targetTypes = [];
     private readonly List<IPacker> _packers = [];
 
-    public void Add(IPacker packer)
+    private void Add(IPacker packer)
     {
         CheckSourceType(packer.SourceType);
         CheckTargetType(packer.TargetType);
@@ -17,6 +17,12 @@ public sealed class PackableRegistryBuilder
         _sourceTypes.Add(packer.SourceType);
         _targetTypes.Add(packer.TargetType);
         _packers.Add(packer);
+    }
+    
+    public PackableRegistryBuilder Add<T>() where T : IPacker, new()
+    {
+        Add(new T());
+        return this;
     }
 
     public IPackerProvider Build()

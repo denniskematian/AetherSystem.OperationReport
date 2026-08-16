@@ -59,6 +59,10 @@ public sealed class ChartController
         ConfigureYAxis(_plot.Axes.Left, config.LeftAxis);
         ConfigureYAxis(_plot.Axes.Right, config.RightAxis);
         
+        ConfigureAxisRange(_plot.Axes.Left, config.LeftAxisRange);
+        ConfigureAxisRange(_plot.Axes.Right, config.RightAxisRange);
+        ConfigureAxisRange(_plot.Axes.Bottom, config.BottomAxisRange);
+        
         var comparer = SeriesConfigColumnComparer.Instance;
         var added = config.Series.Except(_seriesConfigs, comparer);
         var removed = _seriesConfigs.Except(config.Series, comparer);
@@ -240,6 +244,15 @@ public sealed class ChartController
         if (yAxis.TickGenerator is not NumericAutomatic)
             yAxis.TickGenerator = new NumericAutomatic();
         yAxis.FrameLineStyle.IsVisible = false;
+    }
+
+    private static void ConfigureAxisRange(IAxis axis, AxisRange? range)
+    {
+        if (range is null)
+            return;
+
+        axis.Min = range.Min;
+        axis.Max = range.Max;
     }
 
     private class SeriesConfigColumnComparer : IEqualityComparer<SeriesConfig>

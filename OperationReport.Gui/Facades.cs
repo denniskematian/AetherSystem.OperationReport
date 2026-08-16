@@ -20,15 +20,22 @@ public static class Facades
 
     private static IPackerProvider BuildPackerProvider()
     {
-        var builder = new PackableRegistryBuilder();
-        builder.Add(new PresetConfigPacker());
-        builder.Add(new ColumnPacker());
-        builder.Add(new TimestampColumnPacker());
-        builder.Add(new TablePacker());
-        builder.Add(new DataSourceInfoPacker());
-        builder.Add(new SampleReferenceConfigPacker());
-        builder.Add(new SampleSourceInfoPacker());
-        builder.Add(new OperationSourceInfoPacker());
+        var builder = new PackableRegistryBuilder()
+            .Add<PresetConfigPacker>()
+            .Add<ColumnPacker>()
+            .Add<TimestampColumnPacker>()
+            .Add<TablePacker>()
+            .Add<DataSourceInfoPacker>()
+            .Add<SampleReferenceConfigPacker>()
+            .Add<SampleSourceInfoPacker>()
+            .Add<OperationSourceInfoPacker>()
+            .Add<AxisConfigPacker>()
+            .Add<AxisRangePacker>()
+            .Add<ChartConfigPacker>()
+            .Add<ColorInfoPacker>()
+            .Add<LinePatternPacker>()
+            .Add<MarkerConfigPacker>()
+            .Add<SeriesConfigPacker>();
         
         return builder.Build();
     }

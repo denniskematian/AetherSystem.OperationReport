@@ -1,17 +1,31 @@
 namespace AetherSystem.OperationReport.Memento;
 
-public sealed class PackerProvider(IReadOnlyList<IPacker> packers) : IPackerProvider
+public sealed class PackerProvider : IPackerProvider
 {
+    private readonly Dictionary<Type, IPacker> _packers;
+
+    public PackerProvider(IEnumerable<IPacker> packers)
+    {
+        _packers = [];
+        foreach (var packer in packers)
+        {
+            _packers.Add(packer.SourceType, packer);
+            _packers.Add(packer.TargetType, packer);
+        }
+    }
+
     private IPacker GetPacker(Type sourceType)
     {
-        return packers.FirstOrDefault(p => p.SourceType == sourceType)
-            ?? throw new InvalidOperationException($"No packer found for type {sourceType}");
+        return !_packers.TryGetValue(sourceType, out var result)
+               ? throw new InvalidOperationException($"No packer found for type {sourceType}.")
+               : result;
     }
 
     private IPacker GetUnpacker(Type targetType)
     {
-        return packers.FirstOrDefault(p => p.TargetType == targetType)
-            ?? throw new InvalidOperationException($"No unpacker found for type {targetType}");
+        return !_packers.TryGetValue(targetType, out var result)
+            ? throw new InvalidOperationException($"No unpacker found for type {targetType}.")
+            : result;
     }
 
     public IPackableRecord Pack(object value)
