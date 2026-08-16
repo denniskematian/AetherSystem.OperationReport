@@ -1,5 +1,5 @@
+using System.Collections.ObjectModel;
 using AetherSystem.OperationReport.Collections;
-using AetherSystem.OperationReport.Entities;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MahApps.Metro.IconPacks;
@@ -10,9 +10,8 @@ public partial class SampleDataViewModel : DashboardContent
 {
     private const int PageSize = 100;
     private int MaxPage => (int)Math.Ceiling(TotalRows / (double)PageSize);
-
-    [ObservableProperty]
-    public partial IReadOnlyList<Sample> Rows { get; private set; } = [];
+    
+    public ObservableCollection<ObservableSample> Rows { get; } = [];
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(NextPageCommand))]
@@ -57,8 +56,22 @@ public partial class SampleDataViewModel : DashboardContent
     {
         var pageRequest = new PageRequest(page, PageSize);
         var pageResult = Context.DataCollector.GetSamplePage(pageRequest);
+        var items = pageResult.Items;
+
+        var index = 0;
+        for(; index < Rows.Count && index < items.Count; index++)
+            Rows[index].Update(items[index]);
+
+        for (; index < items.Count; index++)
+        {
+            var sample = items[index];
+            var sampleRow = new ObservableSample(sample.Timestamp, sample.Values);
+            Rows.Add(sampleRow);
+        }
+
+        while(Rows.Count > items.Count)
+            Rows.RemoveAt(items.Count);
         
-        Rows = pageResult.Items;
         CurrentPage = pageResult.Page;
         TotalRows = pageResult.TotalCount;
     }

@@ -4,6 +4,7 @@ using AetherSystem.OperationReport.Charting;
 using AetherSystem.OperationReport.Collections;
 using AetherSystem.OperationReport.DataSources;
 using AetherSystem.OperationReport.DataSources.Sqlite;
+using AetherSystem.OperationReport.Memento;
 using AetherSystem.OperationReport.ValueObjects;
 using CommunityToolkit.Mvvm.ComponentModel;
 using ScottPlot;
@@ -12,6 +13,7 @@ namespace AetherSystem.OperationReport.Gui.Features.Main;
 
 public partial class DashboardContext : ObservableObject
 {
+    public PackableRegistry Registry { get; }
     public DataCollector DataCollector { get; }
     public PresetConfig PresetConfig { get; }
     public ChartConfig ChartConfig { get; private set; }
@@ -24,10 +26,11 @@ public partial class DashboardContext : ObservableObject
     
     public event EventHandler? DataCollectorUpdated;
     
-    public DashboardContext(PresetConfig presetConfig, ChartConfig chartConfig)
+    public DashboardContext(PresetConfig presetConfig, ChartConfig chartConfig, PackableRegistry registry)
     {
         PresetConfig = presetConfig;
         ChartConfig = chartConfig;
+        Registry = registry;
         
         var sampleDataAdapter = Facades.DataSourceFactory.CreateSampleTableAdapter(presetConfig.SampleDataSource);
         var operationDataAdapter = Facades.DataSourceFactory.CreateOperationTableAdapter(presetConfig.OperationDataSource);
@@ -76,7 +79,7 @@ public partial class DashboardContext : ObservableObject
         if(value is null)
             return;
 
-        Application.Current.Dispatcher.InvokeAsync(async () =>
+        Application.Current.Dispatcher.Invoke(async () =>
         {
             await DataCollector.UpdateDataAsync(value);
             DataCollectorUpdated?.Invoke(this, EventArgs.Empty);

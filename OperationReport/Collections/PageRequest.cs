@@ -16,16 +16,16 @@ public record PageRequest
         PageSize = pageSize;
     }
 
-    public (int Offset, int Length) ComputeRange(int totalCount)
+    public (int Offset, int Length, int Page) ComputeRange(int totalCount)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(totalCount);
-        if (totalCount == 0) return (0, 0);
+        if (totalCount == 0) return (0, 0, 1);
         
         var maxPage = DivCeil(totalCount, PageSize);
         var page = int.Clamp(Page, 1, maxPage);
         var offset = (page - 1) * PageSize;
         var length = int.Min(PageSize, totalCount - offset);
-        return (offset, length);
+        return (offset, length, page);
     }
     
     private static int DivCeil(int a, int b) => a / b + (a % b == 0 ? 0 : 1);

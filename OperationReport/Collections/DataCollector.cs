@@ -50,7 +50,7 @@ public sealed class DataCollector
         using (LockHandle.Lock(_lock))
         {
             var totalCount = _sampleArrayPool.SegmentSize;
-            var (offset, length) = request.ComputeRange(totalCount);
+            var (offset, length, page) = request.ComputeRange(totalCount);
             if (length == 0)
                 return new PageResult<Sample>(request.PageSize);
 
@@ -67,7 +67,7 @@ public sealed class DataCollector
                 samples[i] = new Sample(timestamp, transposedSegments[i]);
             }
 
-            return new PageResult<Sample>(request.Page, request.PageSize, totalCount, samples);
+            return new PageResult<Sample>(page, request.PageSize, totalCount, samples);
         }
     }
 
@@ -76,7 +76,7 @@ public sealed class DataCollector
         using (LockHandle.Lock(_lock))
         {
             var totalCount = _operationArrayPool.SegmentSize;
-            var (offset, length) = request.ComputeRange(totalCount);
+            var (offset, length, page) = request.ComputeRange(totalCount);
             if (length == 0)
                 return new PageResult<OperationSample>(request.PageSize);
 
@@ -93,7 +93,7 @@ public sealed class DataCollector
                 operations[i] = new OperationSample(timestamp, comment, transposedSegments[i]);
             }
 
-            return new PageResult<OperationSample>(request.Page, request.PageSize, totalCount, operations);
+            return new PageResult<OperationSample>(page, request.PageSize, totalCount, operations);
         }
     }
 

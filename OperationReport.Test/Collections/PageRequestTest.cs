@@ -26,7 +26,7 @@ public class PageRequestTest
     {
         var request = new PageRequest(page: 3, pageSize: 10);
 
-        Assert.Equal((20, 10), request.ComputeRange(totalCount: 35));
+        Assert.Equal((20, 10, 3), request.ComputeRange(totalCount: 35));
     }
 
     [Fact]
@@ -34,7 +34,7 @@ public class PageRequestTest
     {
         var request = new PageRequest(page: 4, pageSize: 10);
 
-        Assert.Equal((30, 5), request.ComputeRange(totalCount: 35));
+        Assert.Equal((30, 5, 4), request.ComputeRange(totalCount: 35));
     }
 
     [Fact]
@@ -42,7 +42,7 @@ public class PageRequestTest
     {
         var request = new PageRequest(page: 99, pageSize: 10);
 
-        Assert.Equal((30, 5), request.ComputeRange(totalCount: 35));
+        Assert.Equal((30, 5, 4), request.ComputeRange(totalCount: 35));
     }
 
     [Fact]
@@ -50,7 +50,7 @@ public class PageRequestTest
     {
         var request = new PageRequest(page: 2, pageSize: 10);
 
-        Assert.Equal((0, 0), request.ComputeRange(totalCount: 0));
+        Assert.Equal((0, 0, 1), request.ComputeRange(totalCount: 0));
     }
 
     [Fact]

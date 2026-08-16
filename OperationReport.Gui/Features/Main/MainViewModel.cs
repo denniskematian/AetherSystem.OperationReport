@@ -52,7 +52,8 @@ public partial class MainViewModel : ObservableObject
         var presetConfig = _registry.Get<PresetConfig>(nameof(PresetConfig))
             ?? throw new InvalidOperationException("Preset config not found");
 
-        var chartConfig = ChartConfig.CreateDefault(presetConfig.SampleReferences);
+        var chartConfig = _registry.Get<ChartConfig>(nameof(ChartConfig)) 
+                         ?? ChartConfig.CreateDefault(presetConfig.SampleReferences);
         
         await InitializeDashboard(presetConfig, chartConfig, result.Value.Name);
     }
@@ -88,7 +89,7 @@ public partial class MainViewModel : ObservableObject
         SavePresetCommand.NotifyCanExecuteChanged();
         TitleText = Title + " - " + name;
 
-        var dashboardContext = new DashboardContext(presetConfig, chartConfig);
+        var dashboardContext = new DashboardContext(presetConfig, chartConfig, _registry);
         CurrentContent = new DashboardViewModel(dashboardContext);
 
         await dashboardContext.DiscoverFilterQueries();

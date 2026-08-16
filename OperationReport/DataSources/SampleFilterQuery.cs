@@ -10,10 +10,12 @@ public record SampleFilterQuery(DateTime? From, DateTime? To, int? BatchNumber) 
                 ? $"From {From:G}" 
                 : To.HasValue 
                     ? $"To {To:G}" 
-                    : "";
+                    : string.Empty;
         
         if (BatchNumber.HasValue)
-            label += $", Batch {BatchNumber}";
+            label = string.IsNullOrEmpty(label) 
+                ? $"Batch {BatchNumber}"
+                : $"{label}, Batch {BatchNumber}";
 
         return label;
     }
