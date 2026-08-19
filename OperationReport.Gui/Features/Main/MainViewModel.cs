@@ -31,10 +31,19 @@ public partial class MainViewModel : ObservableObject
         if(result.IsFailed)
             return;
         
-        _registry.Put(nameof(PresetConfig), result.Value);
-        
-        var chartConfig = ChartConfig.CreateDefault(result.Value.SampleReferences);
-        await InitializeDashboard(result.Value, chartConfig, "New Preset");
+        var lastContent = CurrentContent;
+        try
+        {
+            _registry.Put(nameof(PresetConfig), result.Value);
+            
+            var chartConfig = ChartConfig.CreateDefault(result.Value.SampleReferences);
+            await InitializeDashboard(result.Value, chartConfig, "New Preset");
+        }
+        catch(Exception ex)
+        {
+            Facades.DialogService.ErrorDialog("Unable to create preset.\r\n" + ex.Message);
+            CurrentContent = lastContent;
+        }
     }
 
     [RelayCommand]
@@ -43,20 +52,29 @@ public partial class MainViewModel : ObservableObject
         var result = Facades.DialogService.OpenPresetFileDialog();
         if(result.IsFailed)
             return;
-        
-        CurrentContent = new LoadingViewModel();
-        await using (var stream = result.Value.OpenRead())
-        {
-            await _registry.LoadAsync(stream, true);
-        }
-        
-        var presetConfig = _registry.Get<PresetConfig>(nameof(PresetConfig))
-            ?? throw new InvalidOperationException("Preset config not found");
 
-        var chartConfig = _registry.Get<ChartConfig>(nameof(ChartConfig)) 
-                         ?? ChartConfig.CreateDefault(presetConfig.SampleReferences);
-        
-        await InitializeDashboard(presetConfig, chartConfig, result.Value.Name);
+        var lastContent = CurrentContent;
+        CurrentContent = new LoadingViewModel();
+        try
+        {
+            await using (var stream = result.Value.OpenRead())
+            {
+                await _registry.LoadAsync(stream, true);
+            }
+
+            var presetConfig = _registry.Get<PresetConfig>(nameof(PresetConfig))
+                               ?? throw new InvalidOperationException("Preset config not found");
+
+            var chartConfig = _registry.Get<ChartConfig>(nameof(ChartConfig))
+                              ?? ChartConfig.CreateDefault(presetConfig.SampleReferences);
+
+            await InitializeDashboard(presetConfig, chartConfig, result.Value.Name);
+        }
+        catch (Exception ex)
+        {
+            Facades.DialogService.ErrorDialog("Unable to load preset.\r\n" + ex.Message);
+            CurrentContent = lastContent;
+        }
     }
 
     [RelayCommand(CanExecute = nameof(CanSavePreset))]
@@ -67,17 +85,26 @@ public partial class MainViewModel : ObservableObject
             return;
 
         var tempFile = new FileInfo(Path.GetTempFileName());
-        await using (var file = tempFile.Create())
+        try
         {
-            await _registry.SaveAsync(file);
-        }
+            await using (var file = tempFile.Create())
+            {
+                await _registry.SaveAsync(file);
+            }
 
-        var existingFile = result.Value;
-        if(existingFile.Exists)
-            existingFile.Delete();
+            var existingFile = result.Value;
+            if(existingFile.Exists)
+                existingFile.Delete();
             
-        tempFile.MoveTo(existingFile.FullName);
-        TitleText = Title + " - " + result.Value.Name;
+            tempFile.MoveTo(existingFile.FullName);
+            TitleText = Title + " - " + result.Value.Name;
+        }
+        catch(Exception ex)
+        {
+            Facades.DialogService.ErrorDialog("Unable to save preset.\r\n" + ex.Message);
+            if(tempFile.Exists)
+                tempFile.Delete();
+        }
     }
     
     private bool CanSavePreset()
