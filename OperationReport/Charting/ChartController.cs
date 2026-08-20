@@ -175,7 +175,7 @@ public sealed class ChartController
         var right = Math.Max(bounds.Left, bounds.Right);
         var bottom = Math.Min(bounds.Bottom, bounds.Top);
         var top = Math.Max(bounds.Bottom, bounds.Top);
-        if (stretch)
+        if (!stretch)
         {
             var currentLimits = _plot.Axes.GetLimits();
             var currentWidth = Math.Abs(currentLimits.Right - currentLimits.Left);
