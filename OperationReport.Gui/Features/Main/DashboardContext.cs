@@ -46,6 +46,7 @@ public partial class DashboardContext : ObservableObject
         ChartConfig.BottomAxisLimit = ChartController.GetAxisLimit(AxisPosition.Bottom);
         ChartConfig.LeftAxisLimit = ChartController.GetAxisLimit(AxisPosition.Left);
         ChartConfig.RightAxisLimit = ChartController.GetAxisLimit(AxisPosition.Right);
+        ChartConfig.PrintArea = ChartController.InteractiveRectangleBounds;
         Registry.Put(nameof(ChartConfig), ChartConfig);
     }
 

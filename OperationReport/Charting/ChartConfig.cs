@@ -11,9 +11,11 @@ public sealed class ChartConfig
     public required MarkerConfig OperationMarker { get; init; }
     public required bool ShowDateInBottomTicks { get; init; }
 
-    public AxisLimit? LeftAxisLimit { get; set; }
-    public AxisLimit? RightAxisLimit { get; set; }
-    public AxisLimit? BottomAxisLimit { get; set; }
+    public CoordinateRange? LeftAxisLimit { get; set; }
+    public CoordinateRange? RightAxisLimit { get; set; }
+    public CoordinateRange? BottomAxisLimit { get; set; }
+    
+    public CoordinateRect? PrintArea { get; set; }
 
     public static ChartConfig CreateDefault(IReadOnlyList<SampleReferenceConfig> references)
     {

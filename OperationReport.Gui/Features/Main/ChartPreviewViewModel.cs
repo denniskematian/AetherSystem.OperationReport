@@ -32,4 +32,28 @@ public sealed partial class ChartPreviewViewModel : DashboardContent
         if(controller is not null)
             Application.Current.Dispatcher.Invoke(() => controller.Refresh());
     }
+
+    [RelayCommand]
+    private void SetPrintArea()
+    {
+        Context.ChartController?.AddInteractiveRectangle();
+    }
+
+    [RelayCommand]
+    private void ClearPrintArea()
+    {
+        Context.ChartController?.RemoveInteractiveRectangle();
+    }
+    
+    [RelayCommand]
+    private void GoToPrintArea()
+    {
+        Context.ChartController?.GoToPrintArea();
+    }
+    
+    [RelayCommand]
+    private void PrintAreaPreview()
+    {
+
+    }
 }

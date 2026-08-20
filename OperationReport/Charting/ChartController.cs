@@ -60,10 +60,6 @@ public sealed class ChartController
         ConfigureYAxis(_plot.Axes.Left, config.LeftAxis);
         ConfigureYAxis(_plot.Axes.Right, config.RightAxis);
         
-        ConfigureAxisLimit(_plot.Axes.Left, config.LeftAxisLimit);
-        ConfigureAxisLimit(_plot.Axes.Right, config.RightAxisLimit);
-        ConfigureAxisLimit(_plot.Axes.Bottom, config.BottomAxisLimit);
-        
         var comparer = SeriesConfigColumnComparer.Instance;
         var added = config.Series.Except(_seriesConfigs, comparer);
         var removed = _seriesConfigs.Except(config.Series, comparer);
@@ -121,18 +117,19 @@ public sealed class ChartController
         }
         
         ConfigureBottomTickLabels(config.ShowDateInBottomTicks);
+        ConfigureAxisLimit(_plot.Axes.Left, config.LeftAxisLimit);
+        ConfigureAxisLimit(_plot.Axes.Right, config.RightAxisLimit);
+        ConfigureAxisLimit(_plot.Axes.Bottom, config.BottomAxisLimit);
+        ConfigurePrintArea(config.PrintArea);
         
         Refresh(false);
     }
     
     public void Refresh(bool autoScale = true)
     {
-        if (_plot is { PlotControl: { } plotControl })
-        {
-            if(autoScale)
-                _plot.Axes.AutoScale();
-            plotControl.Refresh();
-        }
+        if (_plot is not { PlotControl: { } plotControl }) return;
+        if(autoScale) _plot.Axes.AutoScale();
+        plotControl.Refresh();
     }
 
     /// <summary>
@@ -143,43 +140,82 @@ public sealed class ChartController
     /// Maximum inset, in axis units, applied to every side. For views smaller
     /// than twenty margin units, ten percent of that axis span is used instead.
     /// </param>
-    public InteractiveRectangle AddInteractiveRectangle(double margin = 10)
+    public void AddInteractiveRectangle(double margin = 10)
     {
         if (!double.IsFinite(margin) || margin < 0)
             throw new ArgumentOutOfRangeException(nameof(margin), "Margin must be a finite non-negative number.");
 
         var bounds = GetInteractiveRectangleBounds(margin);
-        if (_interactiveRectangle is null)
-        {
-            _interactiveRectangle = _plot.Add.InteractiveRectangle(bounds);
-            _interactiveRectangle.LineStyle.Color = Colors.Red;
-            _interactiveRectangle.LineStyle.Width = 1;
-            _interactiveRectangle.FillStyle.Color = Colors.Transparent;
-            _interactiveRectangle.LineStyle.Pattern = LinePattern.Dotted;
-        }
-        else
-        {
-            _interactiveRectangle.Rect = bounds;
-        }
+        ConfigurePrintArea(bounds);
 
         Refresh(false);
-        return _interactiveRectangle;
     }
 
     /// <summary>Removes the interactive rectangle if it is present.</summary>
     /// <returns><see langword="true"/> when a rectangle was removed.</returns>
-    public bool RemoveInteractiveRectangle()
+    public void RemoveInteractiveRectangle()
     {
         if (_interactiveRectangle is null)
-            return false;
+            return;
 
         _plot.PlottableList.Remove(_interactiveRectangle);
         _interactiveRectangle = null;
         Refresh(false);
-        return true;
     }
 
-    public AxisLimit GetAxisLimit(AxisPosition position)
+    /// <summary>Changes the primary plot axes to show the interactive rectangle.</summary>
+    /// <returns><see langword="true"/> when a print area was available.</returns>
+    public void GoToPrintArea(bool stretch = false)
+    {
+        if (_interactiveRectangle is null)
+            return;
+
+        var bounds = _interactiveRectangle.Rect;
+        var left = Math.Min(bounds.Left, bounds.Right);
+        var right = Math.Max(bounds.Left, bounds.Right);
+        var bottom = Math.Min(bounds.Bottom, bounds.Top);
+        var top = Math.Max(bounds.Bottom, bounds.Top);
+        if (stretch)
+        {
+            var currentLimits = _plot.Axes.GetLimits();
+            var currentWidth = Math.Abs(currentLimits.Right - currentLimits.Left);
+            var currentHeight = Math.Abs(currentLimits.Top - currentLimits.Bottom);
+            var targetWidth = right - left;
+            var targetHeight = top - bottom;
+
+            if (currentLimits.HasArea &&
+                double.IsFinite(currentWidth) && currentWidth > 0 &&
+                double.IsFinite(currentHeight) && currentHeight > 0 &&
+                double.IsFinite(targetWidth) && targetWidth > 0 &&
+                double.IsFinite(targetHeight) && targetHeight > 0)
+            {
+                var viewportAspectRatio = currentWidth / currentHeight;
+                var targetAspectRatio = targetWidth / targetHeight;
+
+                if (targetAspectRatio > viewportAspectRatio)
+                {
+                    var expandedHeight = targetWidth / viewportAspectRatio;
+                    var center = (bottom + top) / 2;
+                    bottom = center - expandedHeight / 2;
+                    top = center + expandedHeight / 2;
+                }
+                else
+                {
+                    var expandedWidth = targetHeight * viewportAspectRatio;
+                    var center = (left + right) / 2;
+                    left = center - expandedWidth / 2;
+                    right = center + expandedWidth / 2;
+                }
+            }
+        }
+        _plot.Axes.Bottom.Min = left;
+        _plot.Axes.Bottom.Max = right;
+        _plot.Axes.Left.Min = bottom;
+        _plot.Axes.Left.Max = top;
+        Refresh(false);
+    }
+
+    public CoordinateRange GetAxisLimit(AxisPosition position)
     {
         var axis = position switch
         {
@@ -188,12 +224,7 @@ public sealed class ChartController
             AxisPosition.Bottom => _plot.Axes.Bottom,
             _ => ExceptionUtils.ThrowInvalidEnumArgument<IAxis>(position)
         };
-        
-        return new AxisLimit
-        {
-            Min = axis.Min,
-            Max = axis.Max
-        };
+        return axis.Range.ToCoordinateRange;
     }
 
     private CoordinateRect GetInteractiveRectangleBounds(double margin)
@@ -241,6 +272,26 @@ public sealed class ChartController
         
         _showDateInBottomTicks = showDateInBottomTicks;
     }
+
+    private void ConfigurePrintArea(CoordinateRect? area)
+    {
+        if(area is null)
+            return;
+
+        var bounds = area.Value;
+        if (_interactiveRectangle is null)
+        {
+            _interactiveRectangle = _plot.Add.InteractiveRectangle(bounds);
+            _interactiveRectangle.LineStyle.Color = Colors.Red.WithAlpha(0.666);
+            _interactiveRectangle.LineStyle.Width = 1;
+            _interactiveRectangle.FillStyle.Color = Colors.Transparent;
+            _interactiveRectangle.LineStyle.Pattern = LinePattern.Dotted;
+        }
+        else
+        {
+            _interactiveRectangle.Rect = bounds;
+        }
+    }
     
     private IYAxis GetAxis(AxisPosition axisPosition)
     {
@@ -264,13 +315,13 @@ public sealed class ChartController
         yAxis.FrameLineStyle.IsVisible = false;
     }
 
-    private static void ConfigureAxisLimit(IAxis axis, AxisLimit? limit)
+    private static void ConfigureAxisLimit(IAxis axis, CoordinateRange? limit)
     {
         if (limit is null)
             return;
 
-        axis.Min = limit.Min;
-        axis.Max = limit.Max;
+        axis.Min = limit.Value.Min;
+        axis.Max = limit.Value.Max;
     }
 
     private class SeriesConfigColumnComparer : IEqualityComparer<SeriesConfig>

@@ -5,8 +5,7 @@ namespace AetherSystem.OperationReport.Memento;
 
 public sealed class PackableRegistryBuilder
 {
-    private readonly HashSet<Type> _sourceTypes = [];
-    private readonly HashSet<Type> _targetTypes = [];
+    private readonly HashSet<Type> _types = [];
     private readonly List<IPacker> _packers = [];
 
     private void Add(IPacker packer)
@@ -14,8 +13,8 @@ public sealed class PackableRegistryBuilder
         CheckSourceType(packer.SourceType);
         CheckTargetType(packer.TargetType);
 
-        _sourceTypes.Add(packer.SourceType);
-        _targetTypes.Add(packer.TargetType);
+        _types.Add(packer.SourceType);
+        _types.Add(packer.TargetType);
         _packers.Add(packer);
     }
     
@@ -43,8 +42,8 @@ public sealed class PackableRegistryBuilder
     private void CheckSourceType(Type type)
     {
         ArgumentNullException.ThrowIfNull(type);
-        if (_sourceTypes.Contains(type))
-            throw new InvalidOperationException($"Source type {type} is already registered.");
+        if (_types.Contains(type))
+            throw new InvalidOperationException($"Type {type} is already registered.");
 
         if (Nullable.GetUnderlyingType(type) is not null)
             throw new InvalidOperationException($"Source type {type} can't be nullable value types.");
@@ -53,8 +52,8 @@ public sealed class PackableRegistryBuilder
     private void CheckTargetType(Type type)
     {
         ArgumentNullException.ThrowIfNull(type);
-        if (_targetTypes.Contains(type))
-            throw new InvalidOperationException($"Target type {type} is already registered.");
+        if (_types.Contains(type))
+            throw new InvalidOperationException($"Type {type} is already registered.");
 
         if (Nullable.GetUnderlyingType(type) is not null)
             throw new InvalidOperationException($"Target type {type} can't be nullable value types.");

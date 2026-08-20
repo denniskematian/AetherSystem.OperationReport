@@ -28,8 +28,17 @@
         </mah:SplitButton>
       </StackPanel>
       <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-        <Button Style="{DynamicResource MahApps.Styles.Button.Flat}"
-                Command="{Binding ChangeChartConfigCommand}"
+        <mah:DropDownButton Content="Print Area" Margin="0 0 3 0" Padding="3 2">
+          <mah:DropDownButton.Icon>
+            <iconPacks:PackIconMaterial Margin="6 3" Kind="VectorRectangle" VerticalAlignment="Center" />
+          </mah:DropDownButton.Icon>
+          <mah:DropDownButton.Items>
+            <MenuItem Header="Set print area" Command="{Binding SetPrintAreaCommand}" />
+            <MenuItem Header="Clear print area" Command="{Binding ClearPrintAreaCommand}" />
+            <MenuItem Header="Go to print area" Command="{Binding GoToPrintAreaCommand}" />
+          </mah:DropDownButton.Items>
+        </mah:DropDownButton>
+        <Button Command="{Binding ChangeChartConfigCommand}"
                 Margin="0 0 3 0">
           <Button.Content>
             <StackPanel Orientation="Horizontal">

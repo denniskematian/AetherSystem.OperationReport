@@ -30,7 +30,6 @@ public static class Facades
             .Add<SampleSourceInfoPacker>()
             .Add<OperationSourceInfoPacker>()
             .Add<AxisConfigPacker>()
-            .Add<AxisLimitPacker>()
             .Add<ChartConfigPacker>()
             .Add<ColorInfoPacker>()
             .Add<LinePatternPacker>()
