@@ -64,24 +64,24 @@
                        Text="Program number *" 
                        Margin="0 3" />
             <TextBox Grid.Row="0" Grid.Column="1" 
-                     Text="{Binding ProgramNumber, UpdateSourceTrigger=PropertyChanged}"
+                     Text="{Binding ProgramNumber}"
                      Margin="0 3"/>
             <TextBlock Grid.Column="0" Grid.Row="1" 
                        Text="Batch number *" 
                        Margin="0 3" />
             <TextBox Grid.Row="1" Grid.Column="1" 
-                     Text="{Binding BatchNumber, UpdateSourceTrigger=PropertyChanged}"
+                     Text="{Binding BatchNumber}"
                      Margin="0 3" />
             <TextBlock Grid.Column="0" Grid.Row="2" 
                        Text="Report title *" 
                        Margin="0 3" />
             <TextBox Grid.Row="2" Grid.Column="1" 
-                     Text="{Binding ReportTitle, UpdateSourceTrigger=PropertyChanged}" 
+                     Text="{Binding ReportTitle}" 
                      Margin="0 3" />
             <TextBlock Grid.Column="0" Grid.Row="3" 
                        Text="Serial number *" Margin="0 3" />
             <TextBox Grid.Row="3" Grid.Column="1" 
-                     Text="{Binding SerialNumber, UpdateSourceTrigger=PropertyChanged}" 
+                     Text="{Binding SerialNumber}" 
                      Margin="0 3" />
           </Grid>
         </GroupBox>
@@ -101,7 +101,7 @@
                        Text="Company name *"
                        Margin="0 3" />
             <TextBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"
-                     Text="{Binding CompanyName, UpdateSourceTrigger=PropertyChanged}" 
+                     Text="{Binding CompanyName}" 
                      Margin="0 3"/>
             <TextBlock Grid.Column="0" Grid.Row="1" 
                        Text="Company logo *"
@@ -130,18 +130,76 @@
                        Text="Program type *" 
                        Margin="0 3" />
             <TextBox Grid.Row="0" Grid.Column="1" 
-                     Text="{Binding ProgramType, UpdateSourceTrigger=PropertyChanged}"
+                     Text="{Binding ProgramType}"
                      Margin="0 3" />
             <TextBlock Grid.Column="0" Grid.Row="1" 
                        Text="Started by" Margin="0 6" />
             <TextBox Grid.Row="1" Grid.Column="1" 
-                     Text="{Binding StartedBy, UpdateSourceTrigger=PropertyChanged}"
+                     Text="{Binding StartedBy}"
                      Margin="0 3" />
             <TextBlock Grid.Column="0" Grid.Row="2" 
                        Text="Release" 
                        Margin="0 3" />
             <CheckBox Grid.Row="2" Grid.Column="1" Content="Process released"
                       IsChecked="{Binding IsReleased}" VerticalAlignment="Center" />
+          </Grid>
+        </GroupBox>
+        
+        <GroupBox Header="Operator">
+          <Grid Margin="8 5">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="145" />
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Column="0" Grid.Row="0" 
+                       Text="Officer name *"
+                       Margin="0 3" />
+            <TextBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"
+                     Text="{Binding OperatorName}" 
+                     Margin="0 3"/>
+            <TextBlock Grid.Column="0" Grid.Row="1" 
+                       Text="Officer Signature *"
+                       Margin="0 3" />
+            <DockPanel Grid.Row="1" Grid.Column="1" Margin="0 3">
+              <Button DockPanel.Dock="Right"
+                      Content="Browse..."
+                      Command="{Binding SelectOperatorSignatureCommand}"/>
+              <TextBox Text="{Binding OperatorSignaturePath, Mode=OneWay}"/>
+            </DockPanel>
+          </Grid>
+        </GroupBox>
+        
+        <GroupBox Header="Officer">
+          <Grid Margin="8 5">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="145" />
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Column="0" Grid.Row="0" 
+                       Text="Officer name *"
+                       Margin="0 3" />
+            <TextBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"
+                     Text="{Binding OfficerName}" 
+                     Margin="0 3"/>
+            <TextBlock Grid.Column="0" Grid.Row="1" 
+                       Text="Officer Signature *"
+                       Margin="0 3" />
+            <DockPanel Grid.Row="1" Grid.Column="1" Margin="0 3">
+              <Button DockPanel.Dock="Right"
+                      Content="Browse..."
+                      Command="{Binding SelectOfficerSignatureCommand}"/>
+              <TextBox Text="{Binding OfficerSignaturePath, Mode=OneWay}"/>
+            </DockPanel>
           </Grid>
         </GroupBox>
         
@@ -182,9 +240,9 @@
                       ScrollViewer.CanContentScroll="False">
               <DataGrid.Columns>
                 <DataGridTextColumn Header="Name" Width="*"
-                                    Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
+                                    Binding="{Binding Name}" />
                 <DataGridTextColumn Header="Value" Width="*"
-                                    Binding="{Binding Value, UpdateSourceTrigger=PropertyChanged}" />
+                                    Binding="{Binding Value}" />
               </DataGrid.Columns>
             </DataGrid>
           </Grid>
@@ -229,7 +287,7 @@
                 <DataGridTextColumn Header="Date / Time" Width="150"
                                     Binding="{Binding Timestamp, StringFormat={}{0:yyyy-MM-dd HH:mm:ss}}" />
                 <DataGridTextColumn Header="Message" Width="*"
-                                    Binding="{Binding Message, UpdateSourceTrigger=PropertyChanged}" />
+                                    Binding="{Binding Message}" />
               </DataGrid.Columns>
             </DataGrid>
           </Grid>

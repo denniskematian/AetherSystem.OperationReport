@@ -20,6 +20,10 @@ public partial class ReportViewModel : DashboardContent
     [ObservableProperty] public partial string SerialNumber { get; set; } = string.Empty;
     [ObservableProperty] public partial string CompanyName { get; set; } = string.Empty;
     [ObservableProperty] public partial string CompanyLogoPath { get; private set; } = string.Empty;
+    [ObservableProperty] public partial string OperatorName { get; set; } = string.Empty;
+    [ObservableProperty] public partial string OperatorSignaturePath { get; private set; } = string.Empty;
+    [ObservableProperty] public partial string OfficerName { get; set; } = string.Empty;
+    [ObservableProperty] public partial string OfficerSignaturePath { get; private set; } = string.Empty;
     [ObservableProperty] public partial string ProgramType { get; set; } = string.Empty;
     [ObservableProperty] public partial string StartedBy { get; set; } = string.Empty;
     [ObservableProperty] public partial bool IsReleased { get; set; }
@@ -48,6 +52,7 @@ public partial class ReportViewModel : DashboardContent
 
         try
         {
+            var now = DateTime.Now;
             var programSection = BuildProgramSection(Context.FilterQuery);
             var batchDocument = new BatchDocument(
                 ProgramNumber,
@@ -57,9 +62,9 @@ public partial class ReportViewModel : DashboardContent
                 CompanyName,
                 CompanyLogoPath,
                 programSection,
-                DateTime.Now,
-                operatorSignature: null,
-                officerSignature: null);
+                now,
+                operatorSignature: new Signature(OperatorName, OperatorSignaturePath, now),
+                officerSignature: new Signature(OfficerName, OfficerSignaturePath, now));
 
             var controller = new DocumentController(batchDocument, Context.ChartController);
             await using var output = new FileStream(
@@ -86,6 +91,22 @@ public partial class ReportViewModel : DashboardContent
         var result = Facades.DialogService.OpenFileDialog(ImageFilter);
         if (result.IsSuccess)
             CompanyLogoPath = result.Value.FullName;
+    }
+
+    [RelayCommand]
+    private void SelectOperatorSignature()
+    {
+        var result = Facades.DialogService.OpenFileDialog(ImageFilter);
+        if (result.IsSuccess)
+            OperatorSignaturePath = result.Value.FullName;
+    }
+
+    [RelayCommand]
+    private void SelectOfficerSignature()
+    {
+        var result = Facades.DialogService.OpenFileDialog(ImageFilter);
+        if (result.IsSuccess)
+            OfficerSignaturePath = result.Value.FullName;
     }
 
     [RelayCommand]
