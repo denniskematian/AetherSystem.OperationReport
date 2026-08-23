@@ -185,8 +185,6 @@
                                     Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
                 <DataGridTextColumn Header="Value" Width="*"
                                     Binding="{Binding Value, UpdateSourceTrigger=PropertyChanged}" />
-                <DataGridTextColumn Header="Unit" Width="90"
-                                    Binding="{Binding Unit, UpdateSourceTrigger=PropertyChanged}" />
               </DataGrid.Columns>
             </DataGrid>
           </Grid>

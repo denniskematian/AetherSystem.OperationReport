@@ -1,4 +1,8 @@
 using System.Collections.ObjectModel;
+using System.IO;
+using AetherSystem.OperationReport.Collections;
+using AetherSystem.OperationReport.DataSources;
+using AetherSystem.OperationReport.Reporting;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MahApps.Metro.IconPacks;
@@ -33,6 +37,50 @@ public partial class ReportViewModel : DashboardContent
     }
 
     [RelayCommand]
+    private async Task GeneratePdf()
+    {
+        if(Context.FilterQuery is null || Context.ChartController is null)
+            return;
+        
+        var destination = Facades.DialogService.SaveFileDialog(PdfFilter);
+        if (destination.IsFailed)
+            return;
+
+        try
+        {
+            var programSection = BuildProgramSection(Context.FilterQuery);
+            var batchDocument = new BatchDocument(
+                ProgramNumber,
+                BatchNumber,
+                ReportTitle,
+                SerialNumber,
+                CompanyName,
+                CompanyLogoPath,
+                programSection,
+                DateTime.Now,
+                operatorSignature: null,
+                officerSignature: null);
+
+            var controller = new DocumentController(batchDocument, Context.ChartController);
+            await using var output = new FileStream(
+                destination.Value.FullName,
+                FileMode.Create,
+                FileAccess.Write,
+                FileShare.None,
+                bufferSize: 81920,
+                useAsync: true);
+            await controller.WritePdfAsync(output);
+            await output.FlushAsync();
+            
+            Facades.DialogService.ConfirmDialog("PDF generated successfully.");
+        }
+        catch (Exception ex)
+        {
+            Facades.DialogService.ErrorDialog("Unable to generate PDF.\r\n" + ex.Message);
+        }
+    }
+
+    [RelayCommand]
     private void SelectCompanyLogo()
     {
         var result = Facades.DialogService.OpenFileDialog(ImageFilter);
@@ -59,18 +107,43 @@ public partial class ReportViewModel : DashboardContent
         if (message is not null)
             Messages.Remove(message);
     }
+
+    private ProgramSection BuildProgramSection(SampleFilterQuery filter)
+    {
+        var visibleSeries = Context.ChartConfig.Series.Index()
+            .Where(series => series.Item.IsVisible)
+            .ToArray();
+        var labels = visibleSeries
+            .Select((series, index) => new OperationLogLabel(index, series.Item.Column, series.Item.Label))
+            .ToArray();
+        var valueSources = visibleSeries
+            .Select(series => series.Index)
+            .ToArray();
+        var logs = Context.DataCollector.GetOperationPage(PageRequest.All, valueSources).Items;
+
+        return new ProgramSection(
+            filter.From!.Value,
+            filter.To!.Value,
+            ProgramType,
+            new ProgramSteps(logs, labels),
+            Parameters
+                .Where(parameter => !parameter.IsEmpty)
+                .Select(parameter => new ProgramParameter(parameter.Name, parameter.Value))
+                .ToArray(),
+            IsReleased,
+            StartedBy,
+            Messages.Select(message => new ProgramMessage(message.Timestamp, message.Message)).ToArray());
+    }
 }
 
 public sealed partial class ProgramParameterInput : ObservableObject
 {
     [ObservableProperty] public partial string Name { get; set; } = string.Empty;
     [ObservableProperty] public partial string Value { get; set; } = string.Empty;
-    [ObservableProperty] public partial string Unit { get; set; } = string.Empty;
 
     public bool IsEmpty =>
         string.IsNullOrWhiteSpace(Name) &&
-        string.IsNullOrWhiteSpace(Value) &&
-        string.IsNullOrWhiteSpace(Unit);
+        string.IsNullOrWhiteSpace(Value);
 }
 
 public sealed partial class ProgramMessageInput : ObservableObject

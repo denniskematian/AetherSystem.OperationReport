@@ -71,7 +71,7 @@ public sealed class DataCollector
         }
     }
 
-    public PageResult<OperationSample> GetOperationPage(PageRequest request)
+    public PageResult<OperationSample> GetOperationPage(PageRequest request, IEnumerable<int> indexes)
     {
         using (LockHandle.Lock(_lock))
         {
@@ -82,9 +82,9 @@ public sealed class DataCollector
 
             var operations = new OperationSample[length];
             var timestampSegment = _operationArrayPool.GetSegmentReference(0);
-            var indexes = Enumerable.Range(1, _sampleTableAdapter.SampleColumns.Count).ToArray();
+            var indexesArray = indexes.Select(i => i + 1).ToArray();
             var transposedSegments = _operationArrayPool
-                .GetTransposedSegments(indexes, offset, length);
+                .GetTransposedSegments(indexesArray, offset, length);
 
             for (int i = 0; i < length; i++)
             {
