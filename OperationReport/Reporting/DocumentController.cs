@@ -1,4 +1,5 @@
 using System.Globalization;
+using AetherSystem.OperationReport.Charting;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
@@ -12,12 +13,48 @@ public sealed class DocumentController
     private const string AlternateRowColor = "#F2F2F2";
 
     private readonly BatchDocument _data;
-    private readonly byte[] _companyLogo;
-    private readonly byte[] _plotImage;
-    private readonly byte[]? _operatorSignature;
-    private readonly byte[]? _officerSignature;
-    
-    
+    private readonly ChartController _chartController;
+
+    public DocumentController(BatchDocument data, ChartController chartController)
+    {
+        ArgumentNullException.ThrowIfNull(data);
+        ArgumentNullException.ThrowIfNull(chartController);
+
+        _data = data;
+        _chartController = chartController;
+    }
+
+    public async Task WritePdfAsync(Stream output, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(output);
+
+        if (!output.CanWrite)
+            throw new ArgumentException("The output stream must be writable.", nameof(output));
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        await Task.Run(
+            () => CreateDocument().GeneratePdf(output),
+            cancellationToken).ConfigureAwait(false);
+
+        cancellationToken.ThrowIfCancellationRequested();
+    }
+
+    private IDocument CreateDocument()
+    {
+        return Document.Create(document =>
+        {
+            document.Page(ComposeReport);
+        }).WithMetadata(new DocumentMetadata
+        {
+            Title = _data.Title,
+            Author = _data.CompanyName,
+            Subject = $"Batch {_data.BatchNumber}",
+            Creator = nameof(DocumentController),
+            CreationDate = _data.GeneratedAt,
+            ModifiedDate = _data.GeneratedAt,
+        });
+    }
 
     private void ComposeReport(PageDescriptor page)
     {
@@ -65,7 +102,7 @@ public sealed class DocumentController
                 row.ConstantItem(43, Unit.Millimetre)
                     .Height(18, Unit.Millimetre)
                     .AlignRight()
-                    .Image(_companyLogo)
+                    .Image(_data.CompanyLogoPath)
                     .FitArea();
             });
 
@@ -110,14 +147,14 @@ public sealed class DocumentController
         {
             column.Item()
                 .MinHeight(142, Unit.Millimetre)
-                .Image(_plotImage)
+                .Image(_chartController.GetPrintableChartPng())
                 .FitArea();
 
             column.Item().PaddingTop(3, Unit.Millimetre).Row(row =>
             {
-                row.RelativeItem().Element(element => ComposeSignature(element, "Done/operated by:", _data.OperatorSignature, _operatorSignature));
+                row.RelativeItem().Element(element => ComposeSignature(element, "Done/operated by:", _data.OperatorSignature));
                 row.ConstantItem(8, Unit.Millimetre);
-                row.RelativeItem().Element(element => ComposeSignature(element, "Checked by:", _data.OfficerSignature, _officerSignature));
+                row.RelativeItem().Element(element => ComposeSignature(element, "Checked by:", _data.OfficerSignature));
             });
         });
     }
@@ -186,8 +223,7 @@ public sealed class DocumentController
     private static void ComposeSignature(
         IContainer container,
         string caption,
-        Signature? signature,
-        byte[]? signatureImage)
+        Signature? signature)
     {
         container.Row(row =>
         {
@@ -196,8 +232,8 @@ public sealed class DocumentController
             {
                 column.Item().Height(10, Unit.Millimetre).AlignCenter().AlignMiddle().Element(imageContainer =>
                 {
-                    if (signatureImage is not null)
-                        imageContainer.Image(signatureImage).FitArea();
+                    if (signature?.ImagePath is not null)
+                        imageContainer.Image(signature.ImagePath).FitArea();
                 });
 
                 column.Item().BorderBottom(0.5f).BorderColor(BorderColor).AlignCenter().Text(signature?.Name ?? string.Empty);
@@ -351,9 +387,9 @@ public sealed class DocumentController
 
             column.Item().Row(row =>
             {
-                row.RelativeItem().Element(element => ComposeSignature(element, "Done/operated by:", _data.OperatorSignature, _operatorSignature));
+                row.RelativeItem().Element(element => ComposeSignature(element, "Done/operated by:", _data.OperatorSignature));
                 row.ConstantItem(8, Unit.Millimetre);
-                row.RelativeItem().Element(element => ComposeSignature(element, "Checked by:", _data.OfficerSignature, _officerSignature));
+                row.RelativeItem().Element(element => ComposeSignature(element, "Checked by:", _data.OfficerSignature));
             });
         });
     }

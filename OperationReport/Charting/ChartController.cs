@@ -55,15 +55,72 @@ public sealed class ChartController
         ConfigureBottomTickLabels(showDateInBottomTicks);
     }
 
+    public byte[] GetPrintableChartPng()
+    {
+        var currentBounds = CurrentViewBounds;
+        if (currentBounds is null)
+            throw new InvalidOperationException();
+
+        _interactiveRectangle?.IsVisible = false;
+        var limits = GetPrintAreaLimits();
+        var currentRight = _plot.Axes.Right.GetRange();
+        var currentLeft = _plot.Axes.Left.GetRange();
+        var currentBottom = _plot.Axes.Bottom.GetRange();
+
+        try
+        {
+            _plot.Axes.Bottom.Min = limits.Bottom.Min;
+            _plot.Axes.Bottom.Max = limits.Bottom.Max;
+            _plot.Axes.Left.Min = limits.Left.Min;
+            _plot.Axes.Left.Max = limits.Left.Max;
+            _plot.Axes.Right.Min = limits.Right.Min;
+            _plot.Axes.Right.Max = limits.Right.Max;
+
+            return _plot.GetImage(1600, 900).GetImageBytes();
+        }
+        finally
+        {
+            _plot.Axes.Bottom.Min = currentBottom.Min;
+            _plot.Axes.Bottom.Max = currentBottom.Max;
+            _plot.Axes.Left.Min = currentLeft.Min;
+            _plot.Axes.Left.Max = currentLeft.Max;
+            _plot.Axes.Right.Min = currentRight.Min;
+            _plot.Axes.Right.Max = currentRight.Max;
+            _interactiveRectangle?.IsVisible = true;
+        }
+    }
+
+    private (CoordinateRange Left, CoordinateRange Right, CoordinateRange Bottom) GetPrintAreaLimits()
+    {
+        var currentRight = _plot.Axes.Right.GetRange();
+        var currentLeft = _plot.Axes.Left.GetRange();
+        var currentBottom = _plot.Axes.Bottom.GetRange();
+        if (_interactiveRectangle is null)
+            return (currentLeft, currentRight, currentBottom);
+        
+        var printableBounds = _interactiveRectangle.Rect;
+
+        var bottomAxis = new CoordinateRange(printableBounds.Left, printableBounds.Right);
+        var leftAxis = new CoordinateRange(printableBounds.Bottom, printableBounds.Top);
+
+        var range = currentLeft.Max - currentLeft.Min;
+        var relativeMin = (leftAxis.Min - currentLeft.Min) / range;
+        var relativeMax = (leftAxis.Max - currentLeft.Min) / range;
+
+        range = currentRight.Max - currentRight.Min;
+        var rightAxis = new CoordinateRange(
+            relativeMin * range + currentRight.Min, 
+            relativeMax * range + currentRight.Min);
+
+        return (leftAxis, rightAxis, bottomAxis);
+    }
+
     public void UpdateConfiguration(ChartConfig config)
     {
-        ConfigureYAxis(_plot.Axes.Left, config.LeftAxis);
-        ConfigureYAxis(_plot.Axes.Right, config.RightAxis);
-        
         var comparer = SeriesConfigColumnComparer.Instance;
         var added = config.Series.Except(_seriesConfigs, comparer);
         var removed = _seriesConfigs.Except(config.Series, comparer);
-        
+
         foreach (var seriesConfig in added)
         {
             var dataSource = _dataCollector.GetSampleDataSource(seriesConfig.Column);
@@ -81,7 +138,9 @@ public sealed class ChartController
             plottable.LegendText = seriesConfig.Label;
             plottable.Axes.YAxis = GetAxis(seriesConfig.AxisPosition);
             plottable.LinePattern = seriesConfig.LinePattern;
-            plottable.IsVisible = seriesConfig.IsVisible;
+            var axisVisible = (seriesConfig.AxisPosition == AxisPosition.Left && config.LeftAxis.IsVisible)
+                || (seriesConfig.AxisPosition == AxisPosition.Right && config.RightAxis.IsVisible);
+            plottable.IsVisible = seriesConfig.IsVisible && axisVisible;
             plottable.Color = seriesConfig.Color.Value;
         }
 
@@ -115,7 +174,9 @@ public sealed class ChartController
         {
             _operationPlottable?.IsVisible = false;
         }
-        
+
+        ConfigureYAxis(_plot.Axes.Left, config.LeftAxis);
+        ConfigureYAxis(_plot.Axes.Right, config.RightAxis);
         ConfigureBottomTickLabels(config.ShowDateInBottomTicks);
         ConfigureAxisLimit(_plot.Axes.Left, config.LeftAxisLimit);
         ConfigureAxisLimit(_plot.Axes.Right, config.RightAxisLimit);
@@ -152,7 +213,6 @@ public sealed class ChartController
     }
 
     /// <summary>Removes the interactive rectangle if it is present.</summary>
-    /// <returns><see langword="true"/> when a rectangle was removed.</returns>
     public void RemoveInteractiveRectangle()
     {
         if (_interactiveRectangle is null)
@@ -164,54 +224,20 @@ public sealed class ChartController
     }
 
     /// <summary>Changes the primary plot axes to show the interactive rectangle.</summary>
-    /// <returns><see langword="true"/> when a print area was available.</returns>
-    public void GoToPrintArea(bool stretch = false)
+    public void GoToPrintArea()
     {
         if (_interactiveRectangle is null)
             return;
 
-        var bounds = _interactiveRectangle.Rect;
-        var left = Math.Min(bounds.Left, bounds.Right);
-        var right = Math.Max(bounds.Left, bounds.Right);
-        var bottom = Math.Min(bounds.Bottom, bounds.Top);
-        var top = Math.Max(bounds.Bottom, bounds.Top);
-        if (!stretch)
-        {
-            var currentLimits = _plot.Axes.GetLimits();
-            var currentWidth = Math.Abs(currentLimits.Right - currentLimits.Left);
-            var currentHeight = Math.Abs(currentLimits.Top - currentLimits.Bottom);
-            var targetWidth = right - left;
-            var targetHeight = top - bottom;
-
-            if (currentLimits.HasArea &&
-                double.IsFinite(currentWidth) && currentWidth > 0 &&
-                double.IsFinite(currentHeight) && currentHeight > 0 &&
-                double.IsFinite(targetWidth) && targetWidth > 0 &&
-                double.IsFinite(targetHeight) && targetHeight > 0)
-            {
-                var viewportAspectRatio = currentWidth / currentHeight;
-                var targetAspectRatio = targetWidth / targetHeight;
-
-                if (targetAspectRatio > viewportAspectRatio)
-                {
-                    var expandedHeight = targetWidth / viewportAspectRatio;
-                    var center = (bottom + top) / 2;
-                    bottom = center - expandedHeight / 2;
-                    top = center + expandedHeight / 2;
-                }
-                else
-                {
-                    var expandedWidth = targetHeight * viewportAspectRatio;
-                    var center = (left + right) / 2;
-                    left = center - expandedWidth / 2;
-                    right = center + expandedWidth / 2;
-                }
-            }
-        }
-        _plot.Axes.Bottom.Min = left;
-        _plot.Axes.Bottom.Max = right;
-        _plot.Axes.Left.Min = bottom;
-        _plot.Axes.Left.Max = top;
+        var limits = GetPrintAreaLimits();
+        
+        _plot.Axes.Bottom.Min = limits.Bottom.Min;
+        _plot.Axes.Bottom.Max = limits.Bottom.Max;
+        _plot.Axes.Left.Min = limits.Left.Min;
+        _plot.Axes.Left.Max = limits.Left.Max;
+        _plot.Axes.Right.Min = limits.Right.Min;
+        _plot.Axes.Right.Max = limits.Right.Max;
+        
         Refresh(false);
     }
 
@@ -303,9 +329,10 @@ public sealed class ChartController
         };
     }
 
-    private static void ConfigureYAxis(IYAxis yAxis, AxisConfig config)
+    private void ConfigureYAxis(IYAxis yAxis, AxisConfig config)
     {
-        yAxis.IsVisible = config.IsVisible;
+        yAxis.IsVisible = config.IsVisible 
+                          && _seriesPlottableLookup.Values.Any(i => i.Axes.YAxis == yAxis && i.IsVisible);
         if (!yAxis.IsVisible)
             return;
 
