@@ -10,18 +10,18 @@ public sealed partial class PresetConfigPacker : Packer<PresetConfig, PresetConf
     public override Record Pack(PresetConfig unpacked, IPackerProvider provider)
     {
         return new Record(
-            (SampleSourceInfoPacker.Record)provider.Pack(unpacked.SampleDataSource),
-            (OperationSourceInfoPacker.Record)provider.Pack(unpacked.OperationDataSource),
-            unpacked.SampleReferences.Select(i => (SampleReferenceConfigPacker.Record)provider.Pack(i)).ToArray());
+            provider.Pack<SampleSourceInfoPacker.Record>(unpacked.SampleDataSource),
+            provider.Pack<OperationSourceInfoPacker.Record>(unpacked.OperationDataSource),
+            unpacked.SampleReferences.Select(provider.Pack<SampleReferenceConfigPacker.Record>).ToArray());
     }
 
     public override PresetConfig Unpack(Record packed, IPackerProvider provider)
     {
         return new PresetConfig
         {
-            SampleDataSource = (SampleSourceInfo)provider.Unpack(packed.SampleSourceInfo),
-            OperationDataSource = (OperationSourceInfo)provider.Unpack(packed.OperationSourceInfo),
-            SampleReferences = packed.SampleReferences.Select(i => (SampleReferenceConfig)provider.Unpack(i)).ToArray(),
+            SampleDataSource = provider.Unpack<SampleSourceInfo>(packed.SampleSourceInfo),
+            OperationDataSource = provider.Unpack<OperationSourceInfo>(packed.OperationSourceInfo),
+            SampleReferences = packed.SampleReferences.Select(provider.Unpack<SampleReferenceConfig>).ToArray(),
         };
     }
 

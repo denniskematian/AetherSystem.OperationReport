@@ -12,10 +12,10 @@ public sealed partial class SampleSourceInfoPacker : Packer<SampleSourceInfo, Sa
         return new Record(
             unpacked.FilePath,
             unpacked.FileType,
-            (TablePacker.Record)provider.Pack(unpacked.Table),
-            (TimestampColumnPacker.Record)provider.Pack(unpacked.TimestampColumn),
-            unpacked.BatchNumberColumn is not null ? (ColumnPacker.Record)provider.Pack(unpacked.BatchNumberColumn) : null,
-            unpacked.SampleColumns.Select(column => (ColumnPacker.Record)provider.Pack(column)).ToArray());
+            provider.Pack<TablePacker.Record>(unpacked.Table),
+            provider.Pack<TimestampColumnPacker.Record>(unpacked.TimestampColumn),
+            provider.PackNullable<ColumnPacker.Record>(unpacked.BatchNumberColumn),
+            unpacked.SampleColumns.Select(provider.Pack<ColumnPacker.Record>).ToArray());
     }
 
     public override SampleSourceInfo Unpack(Record packed, IPackerProvider provider)
@@ -23,10 +23,10 @@ public sealed partial class SampleSourceInfoPacker : Packer<SampleSourceInfo, Sa
         return new SampleSourceInfo(
             packed.FilePath,
             packed.FileType,
-            (Table)provider.Unpack(packed.Table),
-            (TimestampColumn)provider.Unpack(packed.TimestampColumn),
-            packed.BatchNumberColumn is not null ? (Column)provider.Unpack(packed.BatchNumberColumn) : null,
-            packed.SampleColumns.Select(column => (Column)provider.Unpack(column)).ToArray());
+            provider.Unpack<Table>(packed.Table),
+            provider.Unpack<TimestampColumn>(packed.TimestampColumn),
+            provider.UnpackNullable<Column>(packed.BatchNumberColumn),
+            packed.SampleColumns.Select(provider.Unpack<Column>).ToArray());
     }
 
     [MemoryPackable]

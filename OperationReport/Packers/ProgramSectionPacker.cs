@@ -12,14 +12,14 @@ public sealed partial class ProgramSectionPacker : Packer<ProgramSection, Progra
             unpacked.StartedAt,
             unpacked.FinishedAt,
             unpacked.ProgramType,
-            (ProgramStepsPacker.Record)provider.Pack(unpacked.ProgramSteps),
+            provider.Pack<ProgramStepsPacker.Record>(unpacked.ProgramSteps),
             unpacked.Parameters
-                .Select(parameter => (ProgramParameterPacker.Record)provider.Pack(parameter))
+                .Select(provider.Pack<ProgramParameterPacker.Record>)
                 .ToArray(),
             unpacked.IsReleased,
             unpacked.StartedBy,
             unpacked.Messages
-                .Select(message => (ProgramMessagePacker.Record)provider.Pack(message))
+                .Select(provider.Pack<ProgramMessagePacker.Record>)
                 .ToArray());
     }
 
@@ -29,14 +29,14 @@ public sealed partial class ProgramSectionPacker : Packer<ProgramSection, Progra
             packed.StartedAt,
             packed.FinishedAt,
             packed.ProgramType,
-            (ProgramSteps)provider.Unpack(packed.ProgramSteps),
+            provider.Unpack<ProgramSteps>(packed.ProgramSteps),
             packed.Parameters
-                .Select(parameter => (ProgramParameter)provider.Unpack(parameter))
+                .Select(provider.Unpack<ProgramParameter>)
                 .ToArray(),
             packed.IsReleased,
             packed.StartedBy,
             packed.Messages
-                .Select(message => (ProgramMessage)provider.Unpack(message))
+                .Select(provider.Unpack<ProgramMessage>)
                 .ToArray());
     }
 

@@ -12,9 +12,9 @@ public sealed partial class OperationSourceInfoPacker : Packer<OperationSourceIn
         return new Record(
             unpacked.FilePath,
             unpacked.FileType,
-            (TablePacker.Record)provider.Pack(unpacked.Table),
-            (TimestampColumnPacker.Record)provider.Pack(unpacked.TimestampColumn),
-            (ColumnPacker.Record)provider.Pack(unpacked.CommentColumn));
+            provider.Pack<TablePacker.Record>(unpacked.Table),
+            provider.Pack<TimestampColumnPacker.Record>(unpacked.TimestampColumn),
+            provider.Pack<ColumnPacker.Record>(unpacked.CommentColumn));
     }
 
     public override OperationSourceInfo Unpack(Record packed, IPackerProvider provider)
@@ -22,9 +22,9 @@ public sealed partial class OperationSourceInfoPacker : Packer<OperationSourceIn
         return new OperationSourceInfo(
             packed.FilePath,
             packed.FileType,
-            (Table)provider.Unpack(packed.Table),
-            (TimestampColumn)provider.Unpack(packed.TimestampColumn),
-            (Column)provider.Unpack(packed.CommentColumn));
+            provider.Unpack<Table>(packed.Table),
+            provider.Unpack<TimestampColumn>(packed.TimestampColumn),
+            provider.Unpack<Column>(packed.CommentColumn));
     }
 
     [MemoryPackable]

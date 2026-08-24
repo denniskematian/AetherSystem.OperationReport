@@ -20,7 +20,7 @@ public sealed partial class MarkerConfigPacker : Packer<MarkerConfig, MarkerConf
             unpacked.Column,
             unpacked.IsVisible,
             unpacked.Shape,
-            (ColorInfoPacker.Record)provider.Pack(unpacked.Color));
+            provider.Pack<ColorInfoPacker.Record>(unpacked.Color));
     }
 
     public override MarkerConfig Unpack(Record packed, IPackerProvider provider)
@@ -30,7 +30,7 @@ public sealed partial class MarkerConfigPacker : Packer<MarkerConfig, MarkerConf
             Column = packed.Column,
             IsVisible = packed.IsVisible,
             Shape = packed.Shape,
-            Color = (ColorInfo)provider.Unpack(packed.Color)
+            Color = provider.Unpack<ColorInfo>(packed.Color)
         };
     }
 }

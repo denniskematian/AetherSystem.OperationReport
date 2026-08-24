@@ -18,7 +18,7 @@ public sealed partial class TablePacker : Packer<Table, TablePacker.Record>
     public override Table Unpack(Record packed, IPackerProvider provider)
     {
         var unpackedColumns = packed.Columns
-            .Select(value => (Column)provider.Unpack(value))
+            .Select(provider.Unpack<Column>)
             .ToArray();
         
         return new Table(packed.Name, unpackedColumns);

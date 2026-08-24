@@ -37,4 +37,24 @@ public sealed class PackerProvider : IPackerProvider
     {
         return GetUnpacker(record.GetType()).Unpack(record, this);
     }
+    
+    public T Pack<T>(object value) where T : IPackableRecord
+    {
+        return (T)GetPacker(value.GetType()).Pack(value, this);
+    }
+    
+    public T? PackNullable<T>(object? value) where T : IPackableRecord
+    {
+        return value is null ? default : (T)GetPacker(value.GetType()).Pack(value, this);
+    }
+    
+    public T Unpack<T>(IPackableRecord record)
+    {
+        return (T)GetUnpacker(record.GetType()).Unpack(record, this);
+    }
+    
+    public T? UnpackNullable<T>(IPackableRecord? record)
+    {
+        return record is null ? default : (T)GetUnpacker(record.GetType()).Unpack(record, this);
+    }
 }

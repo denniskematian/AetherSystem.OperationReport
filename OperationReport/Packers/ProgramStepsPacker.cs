@@ -11,10 +11,10 @@ public sealed partial class ProgramStepsPacker : Packer<ProgramSteps, ProgramSte
     {
         return new Record(
             unpacked.OperationLogs
-                .Select(log => (OperationSamplePacker.Record)provider.Pack(log))
+                .Select(provider.Pack<OperationSamplePacker.Record>)
                 .ToArray(),
             unpacked.OperationLogLabels
-                .Select(label => (OperationLogLabelPacker.Record)provider.Pack(label))
+                .Select(provider.Pack<OperationLogLabelPacker.Record>)
                 .ToArray());
     }
 
@@ -22,10 +22,10 @@ public sealed partial class ProgramStepsPacker : Packer<ProgramSteps, ProgramSte
     {
         return new ProgramSteps(
             packed.OperationLogs
-                .Select(log => (OperationSample)provider.Unpack(log))
+                .Select(provider.Unpack<OperationSample>)
                 .ToArray(),
             packed.OperationLogLabels
-                .Select(label => (OperationLogLabel)provider.Unpack(label))
+                .Select(provider.Unpack<OperationLogLabel>)
                 .ToArray());
     }
 

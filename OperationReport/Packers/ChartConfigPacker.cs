@@ -22,10 +22,10 @@ public sealed partial class ChartConfigPacker : Packer<ChartConfig, ChartConfigP
     public override Record Pack(ChartConfig unpacked, IPackerProvider provider)
     {
         return new Record(
-            (AxisConfigPacker.Record)provider.Pack(unpacked.LeftAxis),
-            (AxisConfigPacker.Record)provider.Pack(unpacked.RightAxis),
-            unpacked.Series.Select(s => (SeriesConfigPacker.Record)provider.Pack(s)).ToArray(),
-            (MarkerConfigPacker.Record)provider.Pack(unpacked.OperationMarker),
+            provider.Pack<AxisConfigPacker.Record>(unpacked.LeftAxis),
+            provider.Pack<AxisConfigPacker.Record>(unpacked.RightAxis),
+            unpacked.Series.Select(provider.Pack<SeriesConfigPacker.Record>).ToArray(),
+            provider.Pack<MarkerConfigPacker.Record>(unpacked.OperationMarker),
             unpacked.ShowDateInBottomTicks,
             unpacked.LeftAxisLimit,
             unpacked.RightAxisLimit,
@@ -37,10 +37,10 @@ public sealed partial class ChartConfigPacker : Packer<ChartConfig, ChartConfigP
     {
         return new ChartConfig
         {
-            LeftAxis = (AxisConfig)provider.Unpack(packed.LeftAxis),
-            RightAxis = (AxisConfig)provider.Unpack(packed.RightAxis),
-            Series = packed.Series.Select(s => (SeriesConfig)provider.Unpack(s)).ToArray(),
-            OperationMarker = (MarkerConfig)provider.Unpack(packed.OperationMarker),
+            LeftAxis = provider.Unpack<AxisConfig>(packed.LeftAxis),
+            RightAxis = provider.Unpack<AxisConfig>(packed.RightAxis),
+            Series = packed.Series.Select(provider.Unpack<SeriesConfig>).ToArray(),
+            OperationMarker = provider.Unpack<MarkerConfig>(packed.OperationMarker),
             ShowDateInBottomTicks = packed.ShowDateInBottomTicks,
             LeftAxisLimit = packed.LeftAxisLimit,
             RightAxisLimit = packed.RightAxisLimit,

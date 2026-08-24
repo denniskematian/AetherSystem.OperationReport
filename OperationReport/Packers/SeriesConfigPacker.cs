@@ -23,8 +23,8 @@ public sealed partial class SeriesConfigPacker : Packer<SeriesConfig, SeriesConf
             unpacked.IsVisible,
             unpacked.AxisPosition,
             unpacked.Label,
-            (ColorInfoPacker.Record)provider.Pack(unpacked.Color),
-            (LinePatternPacker.Record)provider.Pack(unpacked.LinePattern));
+            provider.Pack<ColorInfoPacker.Record>(unpacked.Color),
+            provider.Pack<LinePatternPacker.Record>(unpacked.LinePattern));
     }
 
     public override SeriesConfig Unpack(Record packed, IPackerProvider provider)
@@ -35,8 +35,8 @@ public sealed partial class SeriesConfigPacker : Packer<SeriesConfig, SeriesConf
             IsVisible = packed.IsVisible,
             AxisPosition = packed.AxisPosition,
             Label = packed.Label,
-            Color = (ColorInfo)provider.Unpack(packed.Color),
-            LinePattern = (LinePattern)provider.Unpack(packed.LinePattern),
+            Color = provider.Unpack<ColorInfo>(packed.Color),
+            LinePattern = provider.Unpack<LinePattern>(packed.LinePattern),
         };
     }
 }

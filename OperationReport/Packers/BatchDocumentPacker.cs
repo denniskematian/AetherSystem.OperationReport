@@ -15,10 +15,10 @@ public sealed partial class BatchDocumentPacker : Packer<BatchDocument, BatchDoc
             unpacked.SerialNumber,
             unpacked.CompanyName,
             unpacked.CompanyLogoPath,
-            (ProgramSectionPacker.Record)provider.Pack(unpacked.ProgramSection),
+            provider.Pack<ProgramSectionPacker.Record>(unpacked.ProgramSection),
             unpacked.GeneratedAt,
-            unpacked.OperatorSignature is null ? null : (SignaturePacker.Record)provider.Pack(unpacked.OperatorSignature),
-            unpacked.OfficerSignature is null ? null : (SignaturePacker.Record)provider.Pack(unpacked.OfficerSignature));
+            provider.PackNullable<SignaturePacker.Record>(unpacked.OperatorSignature),
+            provider.PackNullable<SignaturePacker.Record>(unpacked.OfficerSignature));
     }
 
     public override BatchDocument Unpack(Record packed, IPackerProvider provider)
@@ -30,10 +30,10 @@ public sealed partial class BatchDocumentPacker : Packer<BatchDocument, BatchDoc
             packed.SerialNumber,
             packed.CompanyName,
             packed.CompanyLogoPath,
-            (ProgramSection)provider.Unpack(packed.ProgramSection),
+            provider.Unpack<ProgramSection>(packed.ProgramSection),
             packed.GeneratedAt,
-            packed.OperatorSignature is null ? null : (Signature)provider.Unpack(packed.OperatorSignature),
-            packed.OfficerSignature is null ? null : (Signature)provider.Unpack(packed.OfficerSignature));
+            provider.UnpackNullable<Signature>(packed.OperatorSignature),
+            provider.UnpackNullable<Signature>(packed.OfficerSignature));
     }
 
     [MemoryPackable]
