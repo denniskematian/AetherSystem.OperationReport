@@ -135,7 +135,7 @@ public partial class ReportViewModel : DashboardContent
             .Where(series => series.Item.IsVisible)
             .ToArray();
         var labels = visibleSeries
-            .Select((series, index) => new OperationLogLabel(index, series.Item.Column, series.Item.Label))
+            .Select((series, index) => new OperationLogLabel(index, series.Item.Label))
             .ToArray();
         var valueSources = visibleSeries
             .Select(series => series.Index)
