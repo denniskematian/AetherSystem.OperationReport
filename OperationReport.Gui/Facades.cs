@@ -36,6 +36,14 @@ public static class Facades
             .Add<MarkerConfigPacker>()
             .Add<SeriesConfigPacker>()
             .Add<SampleFilterQueryPacker>()
+            .Add<OperationSamplePacker>()
+            .Add<OperationLogLabelPacker>()
+            .Add<ProgramParameterPacker>()
+            .Add<ProgramMessagePacker>()
+            .Add<SignaturePacker>()
+            .Add<ProgramStepsPacker>()
+            .Add<ProgramSectionPacker>()
+            .Add<BatchDocumentPacker>()
             .Build();
     }
 }
