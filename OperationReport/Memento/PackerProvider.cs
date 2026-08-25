@@ -10,7 +10,8 @@ public sealed class PackerProvider : IPackerProvider
         foreach (var packer in packers)
         {
             _packers.Add(packer.SourceType, packer);
-            _packers.Add(packer.TargetType, packer);
+            if(packer.SourceType != packer.TargetType)
+                _packers.Add(packer.TargetType, packer);
         }
     }
 

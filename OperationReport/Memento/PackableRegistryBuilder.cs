@@ -24,6 +24,16 @@ public sealed class PackableRegistryBuilder
         return this;
     }
 
+    public PackableRegistryBuilder AddPackable<T>() where T : IMemoryPackable<T>, IPackableRecord
+    {
+        var type = typeof(T);
+        if (!_types.Add(type))
+            throw new InvalidOperationException($"Type {type} is already registered.");
+
+        _packers.Add(new RecordPacker<T>());
+        return this;
+    }
+
     public IPackerProvider Build()
     {
         List<(ushort, Type)> packableTypes = [
