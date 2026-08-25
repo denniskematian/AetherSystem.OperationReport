@@ -13,15 +13,15 @@ public partial class MainViewModel : ObservableObject
 {
     private const string Title = "Sensor Report";
 
-    private readonly PackableRegistry _registry;
-
     [ObservableProperty] public partial string TitleText { get; private set; } = Title;
     [ObservableProperty] public partial object CurrentContent { get; private set; }
+    
+    public PackableRegistry Registry { get; }
 
     public MainViewModel()
     {
         CurrentContent = new BlankViewModel();
-        _registry = Facades.CreateMementoRegistry();
+        Registry = Facades.CreateMementoRegistry();
     }
     
     [RelayCommand]
@@ -34,7 +34,7 @@ public partial class MainViewModel : ObservableObject
         var lastContent = CurrentContent;
         try
         {
-            _registry.Put(nameof(PresetConfig), result.Value);
+            Registry.Put(nameof(PresetConfig), result.Value);
             
             var chartConfig = ChartConfig.CreateDefault(result.Value.SampleReferences);
             await InitializeDashboard(result.Value, chartConfig, "New Preset");
@@ -59,13 +59,13 @@ public partial class MainViewModel : ObservableObject
         {
             await using (var stream = result.Value.OpenRead())
             {
-                await _registry.LoadAsync(stream, true);
+                await Registry.LoadAsync(stream, true);
             }
 
-            var presetConfig = _registry.Get<PresetConfig>(nameof(PresetConfig))
+            var presetConfig = Registry.Get<PresetConfig>(nameof(PresetConfig))
                                ?? throw new InvalidOperationException("Preset config not found");
 
-            var chartConfig = _registry.Get<ChartConfig>(nameof(ChartConfig))
+            var chartConfig = Registry.Get<ChartConfig>(nameof(ChartConfig))
                               ?? ChartConfig.CreateDefault(presetConfig.SampleReferences);
 
             await InitializeDashboard(presetConfig, chartConfig, result.Value.Name);
@@ -89,7 +89,7 @@ public partial class MainViewModel : ObservableObject
         {
             await using (var file = tempFile.Create())
             {
-                await _registry.SaveAsync(file);
+                await Registry.SaveAsync(file);
             }
 
             var existingFile = result.Value;
@@ -109,7 +109,7 @@ public partial class MainViewModel : ObservableObject
     
     private bool CanSavePreset()
     {
-        return _registry.ContainsKey(nameof(PresetConfig));
+        return Registry.ContainsKey(nameof(PresetConfig));
     }
 
     private async Task InitializeDashboard(PresetConfig presetConfig, ChartConfig chartConfig, string name)
@@ -117,9 +117,9 @@ public partial class MainViewModel : ObservableObject
         SavePresetCommand.NotifyCanExecuteChanged();
         TitleText = Title + " - " + name;
 
-        var dashboardContext = new DashboardContext(presetConfig, chartConfig, _registry);
+        var dashboardContext = new DashboardContext(presetConfig, chartConfig, Registry);
         CurrentContent = new DashboardViewModel(dashboardContext);
-        var filterQuery = _registry.Get<SampleFilterQuery>(nameof(SampleFilterQuery));
+        var filterQuery = Registry.Get<SampleFilterQuery>(nameof(SampleFilterQuery));
         if(filterQuery is not null)
             await dashboardContext.ApplyFilterAsync(filterQuery);
 
