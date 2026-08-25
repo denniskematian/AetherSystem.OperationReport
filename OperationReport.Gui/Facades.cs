@@ -1,4 +1,5 @@
 using AetherSystem.OperationReport.DataSources;
+using AetherSystem.OperationReport.Gui.Features.Main;
 using AetherSystem.OperationReport.Gui.Services;
 using AetherSystem.OperationReport.Memento;
 using AetherSystem.OperationReport.Packers;
@@ -44,6 +45,7 @@ public static class Facades
             .Add<ProgramStepsPacker>()
             .Add<ProgramSectionPacker>()
             .Add<BatchDocumentPacker>()
+            .AddPackable<ReportViewModel.Snapshot>()
             .Build();
     }
 }

@@ -2,10 +2,12 @@ using System.Collections.ObjectModel;
 using System.IO;
 using AetherSystem.OperationReport.Collections;
 using AetherSystem.OperationReport.DataSources;
+using AetherSystem.OperationReport.Memento;
 using AetherSystem.OperationReport.Reporting;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MahApps.Metro.IconPacks;
+using MemoryPack;
 
 namespace AetherSystem.OperationReport.Gui.Features.Main;
 
@@ -34,6 +36,58 @@ public partial class ReportViewModel : DashboardContent
     {
         Title = "Batch Document";
         Icon = new PackIconMaterial { Kind = PackIconMaterialKind.FilePdfBox };
+        
+        context.Registry.PreSaveEvent += RegistryOnPreSaveEvent;
+        var snapshot = context.Registry.Get<Snapshot>(nameof(ReportViewModel));
+        if(snapshot is null)
+            return;
+        
+        ProgramNumber = snapshot.ProgramNumber;
+        BatchNumber = snapshot.BatchNumber;
+        ReportTitle = snapshot.ReportTitle;
+        SerialNumber = snapshot.SerialNumber;
+        CompanyName = snapshot.CompanyName;
+        CompanyLogoPath = snapshot.CompanyLogoPath;
+        OperatorName = snapshot.OperatorName;
+        OperatorSignaturePath = snapshot.OperatorSignaturePath;
+        OfficerName = snapshot.OfficerName;
+        OfficerSignaturePath = snapshot.OfficerSignaturePath;
+        ProgramType = snapshot.ProgramType;
+        StartedBy = snapshot.StartedBy;
+        IsReleased = snapshot.IsReleased;
+        
+        foreach (var programParameterInput in snapshot.Parameters)
+        {
+            Parameters.Add(programParameterInput);
+        }
+        
+        foreach (var programMessageInput in snapshot.Messages)
+        {
+            Messages.Add(programMessageInput);
+        }
+    }
+
+    private void RegistryOnPreSaveEvent(object? sender, EventArgs e)
+    {
+        var snapshot = new Snapshot(
+            ProgramNumber,
+            BatchNumber,
+            ReportTitle,
+            SerialNumber,
+            CompanyName,
+            CompanyLogoPath,
+            OperatorName,
+            OperatorSignaturePath,
+            OfficerName,
+            OfficerSignaturePath,
+            ProgramType,
+            StartedBy,
+            IsReleased,
+            Parameters,
+            Messages
+        );
+
+        Context.Registry.Put(nameof(ReportViewModel), snapshot);
     }
 
     protected override void DataCollectorUpdated()
@@ -155,8 +209,27 @@ public partial class ReportViewModel : DashboardContent
             StartedBy,
             Messages.Select(message => new ProgramMessage(message.Timestamp, message.Message)).ToArray());
     }
+
+    [MemoryPackable]
+    public partial record Snapshot(
+        string ProgramNumber,
+        string BatchNumber,
+        string ReportTitle,
+        string SerialNumber,
+        string CompanyName,
+        string CompanyLogoPath,
+        string OperatorName,
+        string OperatorSignaturePath,
+        string OfficerName,
+        string OfficerSignaturePath,
+        string ProgramType,
+        string StartedBy,
+        bool IsReleased,
+        IReadOnlyList<ProgramParameterInput> Parameters,
+        IReadOnlyList<ProgramMessageInput> Messages) : IPackableRecord;
 }
 
+[MemoryPackable]
 public sealed partial class ProgramParameterInput : ObservableObject
 {
     [ObservableProperty] public partial string Name { get; set; } = string.Empty;
@@ -167,6 +240,7 @@ public sealed partial class ProgramParameterInput : ObservableObject
         string.IsNullOrWhiteSpace(Value);
 }
 
+[MemoryPackable]
 public sealed partial class ProgramMessageInput : ObservableObject
 {
     [ObservableProperty] public partial DateTime Timestamp { get; set; } = DateTime.Now;
